@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Welcome to Sypher</title>
+  <link rel="icon" href="https://static.wixstatic.com/media/a3a3cf_7fe0f60fa9d94a88ac2beaa6a9c41e6f~mv2.png" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f7f7f7;
+      color: #111;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    header {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    header img {
+      height: 32px;
+      width: 32px;
+    }
+
+    header h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+
+    header span {
+      font-size: 0.9rem;
+      color: #777;
+    }
+
+    .slider-container {
+      display: flex;
+      height: 100vh;
+      transition: transform 0.6s ease;
+      width: 500%;
+    }
+
+    .slide {
+      width: 100vw;
+      height: 100vh;
+      padding: 120px 20px 80px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .slide h2 {
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+
+    .slide p {
+      font-size: 1.1rem;
+      max-width: 500px;
+      color: #444;
+    }
+
+    .controls {
+      position: absolute;
+      bottom: 30px;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: center;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .dots {
+      display: flex;
+      gap: 8px;
+    }
+
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #ccc;
+      transition: 0.3s;
+    }
+
+    .dot.active {
+      background: #111;
+    }
+
+    button {
+      padding: 10px 20px;
+      border: none;
+      background: #111;
+      color: white;
+      font-size: 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    @media (max-width: 600px) {
+      .slide h2 {
+        font-size: 1.4rem;
+      }
+
+      .slide p {
+        font-size: 0.95rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <img src="https://static.wixstatic.com/media/a3a3cf_7fe0f60fa9d94a88ac2beaa6a9c41e6f~mv2.png" alt="Sypher Logo" />
+    <div>
+      <h1>Sypher</h1>
+      <span>The Future.</span>
+    </div>
+  </header>
+
+  <div id="slider" class="slider-container">
+    <div class="slide">
+      <h2>Welcome to Sypher</h2>
+      <p>Sypher is a secure game website in collaboration with Nettleweb. Access videos, thousands of games, music and more — all in private about:blank tabs for the best experience.</p>
+    </div>
+    <div class="slide">
+      <h2>Instant Access</h2>
+      <p>Experience lightning-fast loading—no delays, just seamless gameplay.</p>
+    </div>
+    <div class="slide">
+      <h2>Endless Variety</h2>
+      <p>Explore thousands of unblocked games for every mood and style.</p>
+    </div>
+    <div class="slide">
+      <h2>Your Voice Matters</h2>
+      <p>We update Sypher based on community votes and feedback.</p>
+    </div>
+    <div class="slide">
+      <h2>Fresh Weekly</h2>
+      <p>New games added every week—never run out of fun.</p>
+    </div>
+  </div>
+
+  <div class="controls">
+    <div class="dots" id="dots"></div>
+    <button id="nextBtn">Next</button>
+  </div>
+
+  <script>
+    const slider = document.getElementById('slider');
+    const dotsContainer = document.getElementById('dots');
+    const nextBtn = document.getElementById('nextBtn');
+    const totalSlides = 5;
+    let currentSlide = 0;
+
+    // Create dots
+    for (let i = 0; i < totalSlides; i++) {
+      const dot = document.createElement('div');
+      dot.classList.add('dot');
+      if (i === 0) dot.classList.add('active');
+      dotsContainer.appendChild(dot);
+    }
+
+    function updateSlide() {
+      slider.style.transform = `translateX(-${currentSlide * 100}vw)`;
+      const dots = document.querySelectorAll('.dot');
+      dots.forEach((dot, i) => {
+        dot.classList.toggle('active', i === currentSlide);
+      });
+
+      // On last slide, change button to "Finish"
+      if (currentSlide === totalSlides - 1) {
+        nextBtn.textContent = "Finish";
+      } else {
+        nextBtn.textContent = "Next";
+      }
+    }
+
+    nextBtn.addEventListener('click', () => {
+      if (currentSlide < totalSlides - 1) {
+        currentSlide++;
+        updateSlide();
+      } else {
+        // Save completion
+        localStorage.setItem("sypherIntroCompleted", "true");
+        window.location.href = "index.html";
+      }
+    });
+  </script>
+</body>
+</html>

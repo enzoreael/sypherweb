@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sypher Web</title>
+  <link rel="icon" href="https://static.wixstatic.com/media/a3a3cf_7fe0f60fa9d94a88ac2beaa6a9c41e6f~mv2.png">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background-color: #f7f7f7;
+      color: #111;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      overflow: hidden;
+      animation: fadeIn 1s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    header {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    header img {
+      height: 32px;
+      width: 32px;
+    }
+
+    header div {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.1;
+    }
+
+    header h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+
+    header span {
+      font-size: 0.8rem;
+      color: #777;
+      margin-top: 2px;
+    }
+
+    .main-content {
+      animation: fadeIn 1.2s ease;
+    }
+
+    .main-content h2 {
+      font-size: 2.4rem;
+      margin-bottom: 20px;
+    }
+
+    .main-content p {
+      font-size: 1.1rem;
+      max-width: 600px;
+      margin: 0 auto 40px;
+      color: #444;
+    }
+
+    .open-button {
+      padding: 12px 24px;
+      font-size: 1rem;
+      background: #111;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s, transform 0.2s;
+    }
+
+    .open-button:hover {
+      background: #000;
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <img src="https://static.wixstatic.com/media/a3a3cf_7fe0f60fa9d94a88ac2beaa6a9c41e6f~mv2.png" alt="Sypher Logo">
+    <div>
+      <h1>Sypher</h1>
+      <span>The Future.</span>
+    </div>
+  </header>
+
+  <div class="main-content">
+    <h2>Sypher Web</h2>
+    <p>Please sign up to Sypher Web. Admins will review your application and accept or deny it. Be patient while your request is being processed.</p>
+    <button class="open-button" id="openSypher">Open Sypher Web</button>
+  </div>
+
+  <script>
+    // Check if user completed intro
+    if (!localStorage.getItem("sypherIntroCompleted")) {
+      window.location.href = "introduction.html";
+    }
+
+    document.getElementById("openSypher").addEventListener("click", () => {
+      const newTab = window.open("about:blank", "_blank");
+      if (!newTab) {
+        alert("Pop-up blocked! Please allow pop-ups for this site.");
+        return;
+      }
+
+      const logoUrl = "https://static.wixstatic.com/media/a3a3cf_7fe0f60fa9d94a88ac2beaa6a9c41e6f~mv2.png";
+      const pageTitle = "Sypher Web";
+      const targetURL = "https://sypherweb.wixsite.com/sypher";
+
+      newTab.document.write(`
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>${pageTitle}</title>
+          <link rel="icon" href="${logoUrl}" />
+          <style>
+            html, body {
+              margin: 0;
+              height: 100%;
+              background: black;
+              overflow: hidden;
+            }
+            iframe {
+              position: absolute;
+              top: -5%;
+              left: 0;
+              width: 100%;
+              height: 110%;
+              border: none;
+            }
+          </style>
+        </head>
+        <body>
+          <iframe src="${targetURL}" allowfullscreen></iframe>
+        </body>
+        </html>
+      `);
+      newTab.document.close();
+
+      // Redirect current tab to Google
+      window.location.href = "https://www.google.com";
+    });
+  </script>
+</body>
+</html>
