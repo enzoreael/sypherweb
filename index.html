@@ -1,167 +1,464 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sypher Web</title>
-  <link rel="icon" href="https://static.wixstatic.com/media/a3a3cf_7fe0f60fa9d94a88ac2beaa6a9c41e6f~mv2.png">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Google</title>
+
+  <!-- load central auth script first so the inline check uses the authoritative password -->
+  <script src="/autocheck.js"></script>
+
+  <!-- AUTH CHECK: if user is not unlocked with the current password, send them to password.html -->
+  <script>
+    (function(){
+      // Keys used by other scripts
+      const TRY_URL_KEY = 'sypher-try-url';
+      const SHOULD_OPEN_KEY = 'sypher-should-open';
+
+      // Prefer the site-password exposed by autocheck.js. Fallback to any stored value or default.
+      const currentPassword = (window.SYPHER_SITE_PASSWORD)
+        || localStorage.getItem('sypher-password')
+        || '2025';
+
+      const unlocked = localStorage.getItem('sypher-unlocked') === 'true';
+      const unlockedWith = localStorage.getItem('sypher-unlock-password');
+
+      // If unlocked AND the unlock password matches the current site password, allow access.
+      if (!(unlocked && unlockedWith === currentPassword)) {
+        // store where they tried to go (optional)
+        try { localStorage.setItem(TRY_URL_KEY, location.pathname + location.search + location.hash); } catch(e){}
+
+        // Remove any "should-open" marker — prevent auto-open loops when password changed.
+        try { localStorage.removeItem(SHOULD_OPEN_KEY); } catch(e){}
+
+        // Redirect to password gate
+        location.replace('password.html');
+      }
+    })();
+  </script>
+
+  <link rel="icon" href="https://www.google.com/s2/favicons?sz=256&domain_url=https%3A%2F%2Fgoogle.com">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
+    :root {
+      --primary: #7b61ff;
+      --primary-dark: #5f3dc6;
+      --primary-light: #f5f2ff;
+      --text: #0f1724;
+      --text-muted: #6b7280;
+      --bg: linear-gradient(180deg, #fbfbfd 0%, #f7f6fb 100%);
+      --card-bg: rgba(255, 255, 255, 0.90);
+      --card-border: rgba(2, 6, 23, 0.04);
+      --card-shadow: 0 18px 70px rgba(91, 33, 182, 0.06);
+      --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
+      font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-      background-color: #f7f7f7;
-      color: #111;
-      height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      transition: var(--transition);
+      line-height: 1.6;
+      min-height: 100vh;
       display: flex;
-      flex-direction: column;
+      align-items: center;
       justify-content: center;
-      align-items: center;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1000px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .hero-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(10px) saturate(120%);
+      -webkit-backdrop-filter: blur(10px) saturate(120%);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 50px;
+      box-shadow: var(--card-shadow);
+      transition: var(--transition);
       text-align: center;
-      overflow: hidden;
-      animation: fadeIn 1s ease;
     }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
+    .hero-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 25px 80px rgba(91, 33, 182, 0.12);
     }
 
-    header {
-      position: absolute;
-      top: 20px;
-      left: 20px;
+    .brand {
       display: flex;
       align-items: center;
-      gap: 10px;
-    }
-
-    header img {
-      height: 32px;
-      width: 32px;
-    }
-
-    header div {
-      display: flex;
-      flex-direction: column;
-      line-height: 1.1;
-    }
-
-    header h1 {
-      font-size: 1.5rem;
-      font-weight: 600;
-    }
-
-    header span {
-      font-size: 0.8rem;
-      color: #777;
-      margin-top: 2px;
-    }
-
-    .main-content {
-      animation: fadeIn 1.2s ease;
-    }
-
-    .main-content h2 {
-      font-size: 2.4rem;
+      justify-content: center;
+      gap: 15px;
       margin-bottom: 20px;
     }
 
-    .main-content p {
-      font-size: 1.1rem;
-      max-width: 600px;
-      margin: 0 auto 40px;
-      color: #444;
+    .brand-logo {
+      width: 60px;
+      height: 60px;
+      border-radius: 12px;
+      transition: var(--transition);
     }
 
-    .open-button {
-      padding: 12px 24px;
+    .brand:hover .brand-logo {
+      transform: rotate(5deg) scale(1.1);
+    }
+
+    .brand-text {
+      text-align: left;
+    }
+
+    .brand-title {
+      font-size: 2.2rem;
+      font-weight: 800;
+      background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      line-height: 1;
+      margin-bottom: 5px;
+    }
+
+    .brand-subtitle {
       font-size: 1rem;
-      background: #111;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background 0.3s, transform 0.2s;
+      color: var(--text-muted);
     }
 
-    .open-button:hover {
-      background: #000;
-      transform: scale(1.05);
+    .hero-title {
+      font-size: 2.5rem;
+      font-weight: 800;
+      margin-bottom: 15px;
+      background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .hero-subtitle {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      margin-bottom: 30px;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .cta-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 16px 32px;
+      border-radius: 50px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: var(--transition);
+      border: none;
+      cursor: pointer;
+      background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+      color: white;
+      box-shadow: 0 10px 25px rgba(91, 33, 182, 0.3);
+      font-size: 1.1rem;
+      margin-bottom: 30px;
+    }
+
+    .cta-button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 35px rgba(91, 33, 182, 0.4);
+    }
+
+    .toggle-section {
+      background: rgba(123, 97, 255, 0.05);
+      border-radius: 15px;
+      padding: 20px;
+      margin-top: 20px;
+      border: 1px solid rgba(123, 97, 255, 0.1);
+    }
+
+    .toggle-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+    }
+
+    .toggle-row {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .toggle {
+      width: 60px;
+      height: 32px;
+      border-radius: 999px;
+      background: #e6e7ee;
+      position: relative;
+      cursor: pointer;
+      display: inline-block;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+      transition: var(--transition);
+    }
+
+    .toggle .dot {
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #fff;
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      box-shadow: 0 4px 10px rgba(12, 10, 22, 0.15);
+    }
+
+    .toggle.on {
+      background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+    }
+
+    .toggle.on .dot {
+      transform: translateX(28px);
+    }
+
+    .toggle-label {
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+
+    .popup-note {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      max-width: 600px;
+      text-align: center;
+      padding: 0 10px;
+      margin-top: 10px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 30px 0;
+      margin-top: 40px;
+      color: var(--text-muted);
+      border-top: 1px solid var(--card-border);
+    }
+
+    @media (max-width: 768px) {
+      .hero-card {
+        padding: 30px;
+      }
+      
+      .hero-title {
+        font-size: 2rem;
+      }
+      
+      .brand {
+        flex-direction: column;
+        text-align: center;
+      }
+      
+      .brand-text {
+        text-align: center;
+      }
     }
   </style>
 </head>
 <body>
-  <header>
-    <img src="https://static.wixstatic.com/media/a3a3cf_7fe0f60fa9d94a88ac2beaa6a9c41e6f~mv2.png" alt="Sypher Logo">
-    <div>
-      <h1>Sypher</h1>
-      <span>The Future.</span>
-    </div>
-  </header>
+  <div class="container">
+    <div class="hero-card">
+      <div class="brand">
+        <img class="brand-logo" src="https://static.wixstatic.com/media/a3a3cf_7fe0f60fa9d94a88ac2beaa6a9c41e6f~mv2.png" alt="Sypher logo">
+        <div class="brand-text">
+          <div class="brand-title">Sypher</div>
+          <div class="brand-subtitle">Secure Launcher & Games</div>
+        </div>
+      </div>
 
-  <div class="main-content">
-    <h2>Sypher Web</h2>
-    <p>Please sign up to Sypher Web. Admins will review your application and accept or deny it. Be patient while your request is being processed.</p>
-    <button class="open-button" id="openSypher">Open Sypher Web</button>
+      <h1 class="hero-title">Sypher Web — Secure Launcher</h1>
+      <p class="hero-subtitle">Sypher Web is a secure, fast, and ad-free launcher that provides access to unblocked games, servers, and tools. Built with privacy in mind, Sypher ensures members can enjoy Nettleweb, DuckMath, and private Minecraft/Eaglercraft servers safely without distractions.</p>
+
+      <button id="openLauncherBtn" class="cta-button">
+        <i class="fas fa-rocket"></i> Launch Sypher
+      </button>
+
+      <div class="toggle-section">
+        <div class="toggle-wrap">
+          <div class="toggle-row">
+            <div id="autoToggle" class="toggle" role="switch" aria-checked="false" tabindex="0">
+              <div class="dot"></div>
+            </div>
+            <div id="autoLabel" class="toggle-label">Auto-launch: Off</div>
+          </div>
+
+          <div class="popup-note" id="popupNote">
+            <i class="fas fa-info-circle"></i> Enable auto-launch to open Sypher automatically. Allow pop-ups for this site if your browser blocks them.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer>© <span id="year"></span> Sypher — All rights reserved.</footer>
   </div>
 
   <script>
-    // Check if user completed intro
-    if (!localStorage.getItem("sypherIntroCompleted")) {
-      window.location.href = "introduction.html";
+  (function(){
+    const openBtn = document.getElementById('openLauncherBtn');
+    const autoToggle = document.getElementById('autoToggle');
+    const autoLabel = document.getElementById('autoLabel');
+    const yearSpan = document.getElementById('year');
+
+    // Obfuscated storage keys
+    const AUTO_KEY = 's_a';
+    const SHOULD_OPEN_KEY = 's_so';
+
+    // Enhanced about:blank launcher with additional obfuscation
+    function openLauncherWindow(){
+      const features = 'width=1100,height=760,scrollbars=yes,resizable=yes,popup=yes';
+      const name = 'sypher_launcher_' + Math.random().toString(36).substring(2, 15);
+      
+      // Open about:blank explicitly
+      const win = window.open('about:blank', name, features);
+      if (!win) return null;
+
+      // Create a randomized HTML content to avoid pattern detection
+      const randomClass = 'frame_' + Math.random().toString(36).substring(2, 8);
+      const randomStyle = 'style_' + Math.random().toString(36).substring(2, 8);
+      
+      const popupHtml = `
+        <!doctype html>
+        <html>
+          <head>
+            <meta charset="utf-8" />
+            <meta name="viewport" content="width=device-width,initial-scale=1" />
+            <title>Google.com</title>
+            <style>
+              html,body { height:100%; margin:0; background:transparent; overflow:hidden; }
+              .${randomClass} { border:0; width:100%; height:100vh; display:block; }
+              .${randomStyle} { display:none; }
+            </style>
+          </head>
+          <body>
+            <div class="${randomStyle}">Loading secure content...</div>
+            <iframe class="${randomClass}" src="home.html" title="Google.com"></iframe>
+            <script>
+              // Additional security measures
+              window.addEventListener('load', function() {
+                try {
+                  // Prevent framing of this page
+                  if (window !== window.top) {
+                    window.top.location.href = window.location.href;
+                  }
+                } catch(e) {}
+              });
+           <\/script>
+          </body>
+        </html>
+      `;
+
+      // Write to the popup with error handling
+      try {
+        win.document.open();
+        win.document.write(popupHtml);
+        win.document.close();
+        win.focus();
+        return win;
+      } catch (err) {
+        console.error('Error writing to popup:', err);
+        try { win.close(); } catch(e) {}
+        return null;
+      }
     }
 
-    document.getElementById("openSypher").addEventListener("click", () => {
-      const newTab = window.open("about:blank", "_blank");
-      if (!newTab) {
-        alert("Pop-up blocked! Please allow pop-ups for this site.");
+    // Refresh toggle UI from storage (OFF by default)
+    function refreshAutoUI(){
+      const on = localStorage.getItem(AUTO_KEY) === 'true';
+      autoToggle.classList.toggle('on', on);
+      autoToggle.setAttribute('aria-checked', on ? 'true' : 'false');
+      autoLabel.textContent = on ? 'Auto-launch: On' : 'Auto-launch: Off';
+    }
+
+    function toggleAuto(){
+      const cur = localStorage.getItem(AUTO_KEY) === 'true';
+      localStorage.setItem(AUTO_KEY, (!cur).toString());
+      refreshAutoUI();
+    }
+
+    autoToggle.addEventListener('click', (e)=>{ e.preventDefault(); toggleAuto(); });
+    autoToggle.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' ') { e.preventDefault(); toggleAuto(); } });
+
+    openBtn.addEventListener('click', (e)=>{
+      e.preventDefault();
+      const w = openLauncherWindow();
+      if(!w){
+        alert('Popup blocked. Please allow pop-ups for this site and try again.');
         return;
       }
-
-      const logoUrl = "https://static.wixstatic.com/media/a3a3cf_7fe0f60fa9d94a88ac2beaa6a9c41e6f~mv2.png";
-      const pageTitle = "Sypher Web";
-      const targetURL = "https://sypherweb.wixsite.com/sypher";
-
-      newTab.document.write(`
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>${pageTitle}</title>
-          <link rel="icon" href="${logoUrl}" />
-          <style>
-            html, body {
-              margin: 0;
-              height: 100%;
-              background: black;
-              overflow: hidden;
-            }
-            iframe {
-              position: absolute;
-              top: -5%;
-              left: 0;
-              width: 100%;
-              height: 110%;
-              border: none;
-            }
-          </style>
-        </head>
-        <body>
-          <iframe src="${targetURL}" allowfullscreen></iframe>
-        </body>
-        </html>
-      `);
-      newTab.document.close();
-
-      // Redirect current tab to Google
-      window.location.href = "https://www.google.com";
+      // Redirect this tab after opening
+      setTimeout(()=>{ window.location.href = 'https://www.google.com'; }, 500);
     });
+
+    // Initialize
+    yearSpan.textContent = new Date().getFullYear();
+    refreshAutoUI();
+
+    // Helper to check unlocked status matching current authoritative password
+    function isUnlockedAndValidPassword(){
+      try {
+        const UNLOCK_KEY = 'sypher-unlocked';
+        const UNLOCK_WITH_KEY = 'sypher-unlock-password';
+        const storedUnlocked = localStorage.getItem(UNLOCK_KEY) === 'true';
+        const unlockedWith = localStorage.getItem(UNLOCK_WITH_KEY);
+        const currentPassword = (window.SYPHER_SITE_PASSWORD) || localStorage.getItem('sypher-password') || '2025';
+        return storedUnlocked && unlockedWith === currentPassword;
+      } catch (e) {
+        return false;
+      }
+    }
+
+    // On load: attempt auto-open if enabled
+    window.addEventListener('load', ()=>{
+      const autoOn = localStorage.getItem(AUTO_KEY) === 'true';
+      const shouldOpen = localStorage.getItem(SHOULD_OPEN_KEY) === 'true';
+
+      if (autoOn || shouldOpen) {
+        // Only proceed when unlocked and unlock-password matches authoritative password
+        if (!isUnlockedAndValidPassword()) {
+          try { localStorage.removeItem(SHOULD_OPEN_KEY); } catch(e){}
+          return;
+        }
+
+        // valid unlocked user — open
+        if (shouldOpen) localStorage.removeItem(SHOULD_OPEN_KEY);
+        const w = openLauncherWindow();
+        if (w) {
+          setTimeout(()=>{ window.location.href = 'https://www.google.com'; }, 500);
+        } else {
+          console.warn('Auto-launch attempted but was blocked by browser.');
+        }
+      }
+    });
+
+    // Additional security: Randomize function names periodically
+    setInterval(() => {
+      try {
+        // This creates noise that makes it harder for extensions to detect patterns
+        const noise = Math.random().toString(36).substring(2, 15);
+        localStorage.setItem('n_' + noise, Date.now().toString());
+      } catch(e) {}
+    }, 30000);
+  })();
   </script>
 </body>
 </html>

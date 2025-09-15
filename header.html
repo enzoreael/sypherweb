@@ -1,0 +1,357 @@
+<!-- header.html -->
+<header id="sypher-header" class="sypher-header" role="banner" aria-label="Site header">
+  <script>
+    (function immediateThemeApply(){
+      try {
+        const THEME_KEY = 'sypher-theme';
+        const stored = (localStorage.getItem(THEME_KEY));
+        if (stored) {
+          const disable = document.createElement('style');
+          disable.id = 'sypher-disable-transitions';
+          disable.textContent = '* { transition: none !important; animation: none !important; }';
+          (document.head || document.documentElement).appendChild(disable);
+          document.documentElement.setAttribute('data-theme', stored);
+
+          // notify listeners (so pages can react immediately)
+          try { document.dispatchEvent(new CustomEvent('sypher-theme-changed', {detail:{theme:stored}})); } catch(e){}
+
+          requestAnimationFrame(()=> requestAnimationFrame(()=> {
+            const el = document.getElementById('sypher-disable-transitions');
+            if (el && el.parentNode) el.parentNode.removeChild(el);
+          }));
+        }
+      } catch(e){}
+    })();
+  </script>
+
+  <div class="sypher-frame">
+    <div class="sypher-inner">
+      <a class="brand" href="./home.html">
+        <img class="brand-logo" src="https://static.wixstatic.com/media/a3a3cf_7fe0f60fa9d94a88ac2beaa6a9c41e6f~mv2.png/v1/fill/w_40,h_40,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/download%20(2).png" alt="Sypher logo" />
+        <div class="brand-text">
+          <div class="brand-title">Sypher</div>
+          <div class="brand-sub">The Future.</div>
+        </div>
+      </a>
+
+      <nav class="main-nav" role="navigation" aria-label="Main navigation">
+        <a class="nav-link" href="./home.html">Home</a>
+        <a class="nav-link" href="./proxies.html">Proxies</a>
+        <a class="nav-link" href="./nettleweb.html">Nettleweb</a>
+        <a class="nav-link" href="./duckmath.html">DuckMath</a>
+        <a class="nav-link" href="./servers.html">Servers</a>
+        <a class="nav-link" href="./chat.html">Chat</a>
+      </nav>
+
+      <div class="header-actions">
+        <button id="sypher-theme-toggle" class="theme-toggle" aria-pressed="false" aria-label="Toggle theme" title="Toggle theme">
+          <i class="fas fa-moon"></i>
+        </button>
+
+        <button id="sypher-fullscreen-btn" class="fullscreen-btn" aria-pressed="false" aria-label="Enter fullscreen" title="Enter fullscreen">
+          <i class="fas fa-expand"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    :root {
+      --primary: #7b61ff;
+      --primary-dark: #5f3dc6;
+      --primary-light: #f5f2ff;
+      --text: #0f1724;
+      --text-muted: #6b7280;
+      --glass-bg: rgba(255, 255, 255, 0.85);
+      --glass-border: rgba(2, 6, 23, 0.15);
+      --glass-blur: 16px;
+      --glass-glow: 0 0 20px rgba(123, 97, 255, 0.2);
+      --transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    [data-theme="dark"] {
+      --primary: #8e7bff;
+      --primary-dark: #7b61ff;
+      --primary-light: rgba(109, 40, 217, 0.12);
+      --text: #f8fafc;
+      --text-muted: #9aa3af;
+      --glass-bg: rgba(18, 12, 30, 0.35);
+      --glass-border: rgba(255, 255, 255, 0.12);
+      --glass-blur: 14px;
+      --glass-glow: 0 0 20px rgba(123, 97, 255, 0.3);
+    }
+
+    .sypher-header {
+      position: sticky;
+      top: 20px;
+      z-index: 9999;
+      display: block;
+      width: 100%;
+      transition: transform 0.3s ease, height 0.3s ease;
+      font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    .sypher-frame {
+      max-width: 1200px;
+      margin: 0 auto;
+      position: relative;
+      padding: 0 20px;
+    }
+
+    .sypher-inner {
+      height: 70px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      border-radius: 16px;
+      padding: 0 20px;
+      background: var(--glass-bg);
+      backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+      -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--glass-glow), 0 8px 32px rgba(0, 0, 0, 0.1);
+      transition: var(--transition);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: inherit;
+      min-width: 0;
+      transition: var(--transition);
+      padding: 5px 10px;
+      border-radius: 12px;
+    }
+
+    .brand:hover {
+      transform: translateY(2px);
+    }
+
+    .brand-logo {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      transition: var(--transition);
+      display: block;
+      filter: brightness(0.9);
+    }
+    
+    [data-theme="dark"] .brand-logo {
+      filter: brightness(0) invert(1) drop-shadow(0 0 5px rgba(255, 255, 255, 0.5));
+    }
+    
+    .brand:hover .brand-logo {
+      transform: rotate(5deg) scale(1.05);
+      filter: drop-shadow(0 0 8px rgba(123, 97, 255, 0.6));
+    }
+    
+    [data-theme="dark"] .brand:hover .brand-logo {
+      filter: brightness(0) invert(1) drop-shadow(0 0 10px rgba(255, 255, 255, 0.8));
+    }
+
+    .brand-text {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .brand-title {
+      font-weight: 700;
+      font-size: 1.4rem;
+      letter-spacing: -0.02em;
+      margin-bottom: 2px;
+      transition: var(--transition);
+      background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-fill-color: transparent;
+    }
+    
+    .brand:hover .brand-title {
+      transform: translateY(1px);
+      text-shadow: 0 0 10px rgba(123, 97, 255, 0.4);
+    }
+
+    .brand-sub {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      transition: var(--transition);
+    }
+    
+    .brand:hover .brand-sub {
+      transform: translateY(1px);
+      color: var(--primary);
+    }
+
+    .main-nav {
+      display: flex;
+      gap: 5px;
+      margin-left: 20px;
+      flex: 1;
+      align-items: center;
+    }
+
+    .nav-link {
+      padding: 10px 15px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      transition: var(--transition);
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      white-space: nowrap;
+    }
+
+    .nav-link:hover {
+      color: var(--primary);
+      background: rgba(123, 97, 255, 0.1);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(123, 97, 255, 0.2);
+    }
+
+    .nav-link.active {
+      color: var(--primary);
+      background: rgba(123, 97, 255, 0.15);
+      font-weight: 600;
+    }
+
+    .nav-link.active::before {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 15px;
+      right: 15px;
+      height: 2px;
+      background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+      border-radius: 2px;
+      box-shadow: 0 0 8px var(--primary);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .theme-toggle, .fullscreen-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 46px;
+      height: 46px;
+      border-radius: 12px;
+      border: 1px solid var(--glass-border);
+      background: rgba(255, 255, 255, 0.1);
+      cursor: pointer;
+      transition: var(--transition);
+      color: var(--text-muted);
+      font-size: 1.2rem;
+    }
+
+    .theme-toggle:hover, .fullscreen-btn:hover {
+      background: rgba(123, 97, 255, 0.2);
+      color: var(--primary);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(123, 97, 255, 0.3);
+    }
+
+    @media (max-width: 880px) {
+      .main-nav {
+        display: none;
+      }
+      
+      .sypher-inner {
+        padding: 0 15px;
+      }
+    }
+
+    [data-fullscreen="true"] .sypher-inner {
+      transform: translateY(-140%);
+      opacity: 0;
+      pointer-events: none;
+      transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.2, 1), opacity 0.3s cubic-bezier(0.2, 0.9, 0.2, 1);
+    }
+  </style>
+
+  <script>
+    (function headerModule(){
+      const THEME_KEY = 'sypher-theme';
+      const toggle = document.getElementById('sypher-theme-toggle');
+      const fullscreenBtn = document.getElementById('sypher-fullscreen-btn');
+
+      function applyTheme(theme){
+        document.documentElement.setAttribute('data-theme', theme);
+        if(toggle) toggle.setAttribute('aria-pressed', theme === 'dark');
+        try { document.dispatchEvent(new CustomEvent('sypher-theme-changed', {detail:{theme}})); } catch(e){}
+      }
+
+      try {
+        const stored = localStorage.getItem(THEME_KEY);
+        if (stored !== null && stored !== undefined) applyTheme(stored);
+        else applyTheme('light');
+      } catch(e) { applyTheme('light'); }
+
+      if(toggle){
+        toggle.addEventListener('click', ()=>{
+          const cur = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+          const next = cur === 'dark' ? 'light' : 'dark';
+          try { localStorage.setItem(THEME_KEY, next); } catch(e){}
+          applyTheme(next);
+        });
+      }
+
+      function markActiveNav(){
+        const links = Array.from(document.querySelectorAll('.main-nav .nav-link'));
+        const file = (location.pathname.split('/').pop() || 'home.html').toLowerCase();
+        links.forEach(a=>{
+          const href = (a.getAttribute('href') || '').split('/').pop().toLowerCase();
+          if (!href) return a.classList.remove('active');
+          if (href === file || (file === '' && (href === 'index.html' || href === 'home.html'))) a.classList.add('active');
+          else a.classList.remove('active');
+        });
+      }
+
+      async function enterFullscreen(){
+        try {
+          if (!document.fullscreenElement) {
+            await document.documentElement.requestFullscreen();
+            document.documentElement.setAttribute('data-fullscreen','true');
+            if(fullscreenBtn) fullscreenBtn.setAttribute('aria-pressed','true');
+            fullscreenBtn.title = 'Exit fullscreen';
+          } else {
+            await document.exitFullscreen();
+          }
+        } catch(e){}
+      }
+
+      if(fullscreenBtn){
+        fullscreenBtn.addEventListener('click', enterFullscreen);
+        const onChange = ()=>{
+          if(!document.fullscreenElement){
+            document.documentElement.removeAttribute('data-fullscreen');
+            if(fullscreenBtn) { fullscreenBtn.setAttribute('aria-pressed','false'); fullscreenBtn.title = 'Enter fullscreen'; }
+          } else {
+            document.documentElement.setAttribute('data-fullscreen','true');
+            if(fullscreenBtn) { fullscreenBtn.setAttribute('aria-pressed','true'); fullscreenBtn.title = 'Exit fullscreen'; }
+          }
+        };
+        document.addEventListener('fullscreenchange', onChange, {passive:true});
+        window.addEventListener('fullscreenchange', onChange, {passive:true});
+        document.addEventListener('webkitfullscreenchange', onChange, {passive:true});
+        document.addEventListener('mozfullscreenchange', onChange, {passive:true});
+      }
+
+      window.__sypherHeader = { markActiveNav, applyTheme };
+      setTimeout(markActiveNav, 80);
+    })();
+  </script>
+</header>

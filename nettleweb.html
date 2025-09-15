@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- central auth check -->
+  <script src="/autocheck.js"></script>
+
+  <!-- THEME BOOT SNIPPET -->
+  <script>
+  (function(){
+    try {
+      var KEY = 'sypher-theme';
+      var stored = null;
+      try { stored = localStorage.getItem(KEY); } catch(e){ stored = null; }
+      if (!stored) {
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) stored = 'dark';
+        else stored = 'light';
+      }
+      var disable = document.createElement('style');
+      disable.id = 'sypher-disable-transitions';
+      disable.textContent = '*{transition:none!important;animation:none!important;}';
+      (document.head || document.documentElement).appendChild(disable);
+      document.documentElement.setAttribute('data-theme', stored);
+      if (stored === 'dark') {
+        document.documentElement.style.background='#0b0b0c';
+        document.documentElement.style.color='#f8fafc';
+      } else {
+        document.documentElement.style.background='#fbfbfd';
+        document.documentElement.style.color='#0f1724';
+      }
+      requestAnimationFrame(function(){
+        requestAnimationFrame(function(){
+          var el = document.getElementById('sypher-disable-transitions');
+          if (el && el.parentNode) el.parentNode.removeChild(el);
+          document.documentElement.style.background='';
+          document.documentElement.style.color='';
+        });
+      });
+    } catch(e){}
+  })();
+  </script>
+
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Sypher — Nettleweb</title>
+
+  <style>
+    :root { --header-offset: 84px; }
+
+    html[data-fullscreen="true"]{ --header-offset: 0px; }
+
+    html,body {
+      height:100%; margin:0;
+      background:transparent;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;
+    }
+
+    #header-placeholder{
+      height:var(--header-offset);
+      min-height:var(--header-offset);
+      background:var(--header-bg,#fafbff);
+      transition:background 280ms ease, height 220ms ease, opacity 220ms ease;
+      z-index:10;
+    }
+    [data-theme="dark"] #header-placeholder{ background:#0a0a0b; }
+
+    /* ✅ Hide header placeholder fully in fullscreen */
+    html[data-fullscreen="true"] #header-placeholder {
+      height:0;
+      min-height:0;
+      opacity:0;
+      pointer-events:none;
+    }
+
+    .site-iframe{
+      position:fixed;
+      top:var(--header-offset); left:0; right:0; bottom:0;
+      width:100%;
+      height:calc(100vh - var(--header-offset));
+      border:0;
+      display:block;
+      z-index:1;
+      transition: top 220ms ease, height 220ms ease, transform 220ms ease;
+    }
+    html[data-fullscreen="true"] .site-iframe{
+      top:0; height:100vh;
+      transform:translateY(0);
+    }
+
+    /* Sypher-style popup */
+    #loading-popup {
+      position:fixed; top:50%; left:50%;
+      transform:translate(-50%,-40%);
+      background:rgba(255,255,255,0.65);
+      backdrop-filter:blur(18px) saturate(180%);
+      -webkit-backdrop-filter:blur(18px) saturate(180%);
+      padding:22px 28px;
+      border-radius:20px;
+      box-shadow:0 12px 40px rgba(0,0,0,0.15);
+      z-index:9999;
+      max-width:420px;
+      opacity:0;
+      transition:opacity 0.8s ease, transform 0.8s ease;
+      text-align:left;
+      display:flex; flex-direction:column; gap:10px;
+    }
+    [data-theme="dark"] #loading-popup {
+      background:rgba(20,20,20,0.65); color:#f8fafc;
+    }
+    #loading-popup h2 {
+      margin:0; font-size:1.15rem; font-weight:600;
+      color:#7c3aed; text-align:center;
+    }
+    #loading-popup p {
+      margin:0; font-size:0.95rem; opacity:0.95;
+      line-height:1.45; text-align:left;
+    }
+    #loading-popup.show { opacity:1; transform:translate(-50%,-50%); }
+    #loading-popup.fade-out { opacity:0; transform:translate(-50%,-30%); }
+  </style>
+</head>
+<body>
+  <div id="header-placeholder"></div>
+
+  <!-- Sypher glass popup -->
+  <div id="loading-popup" role="status" aria-live="polite">
+    <h2>Important Notice</h2>
+    <p>Loading may take a little longer than usual. Please be patient.</p>
+  </div>
+
+  <iframe class="site-iframe" id="siteFrame"
+    src="https://whitespider-self.vercel.app/"
+    title="Nettleweb"
+    loading="eager"
+    allow="fullscreen; autoplay; picture-in-picture; encrypted-media; accelerometer; gyroscope; clipboard-read; clipboard-write; microphone; camera"
+    allowfullscreen webkitallowfullscreen mozallowfullscreen></iframe>
+
+  <script>
+  (function(){
+    const HEADER_PATH = './header.html';
+    const iframe = document.getElementById('siteFrame');
+
+    async function injectHeader(){
+      const placeholder = document.getElementById('header-placeholder');
+      try {
+        const res = await fetch(HEADER_PATH,{cache:'no-cache'});
+        if(!res.ok) throw new Error('header fetch failed: ' + res.status);
+        const text = await res.text();
+        placeholder.innerHTML = text;
+
+        // re-execute scripts
+        const temp = document.createElement('div');
+        temp.innerHTML = text;
+        const scripts = temp.querySelectorAll('script');
+        for(const s of scripts){
+          const newScript = document.createElement('script');
+          if(s.src){
+            newScript.src = s.src;
+            await new Promise(r=>{ newScript.onload=r; newScript.onerror=r; document.body.appendChild(newScript); });
+          } else {
+            newScript.textContent = s.textContent;
+            document.body.appendChild(newScript);
+          }
+        }
+
+        // apply stored theme
+        const stored = localStorage.getItem('sypher-theme') || 'light';
+        if(window.__sypherHeader?.applyTheme) window.__sypherHeader.applyTheme(stored);
+        document.documentElement.setAttribute('data-theme', stored);
+        sendThemeToIframe(stored);
+      } catch(e){ console.warn('header load failed', e); }
+    }
+
+    function sendThemeToIframe(theme){
+      try { iframe.contentWindow.postMessage({type:'theme-change',theme},"*"); }
+      catch(e){}
+    }
+
+    // theme change from header
+    document.addEventListener('sypher-theme-changed', e=>{
+      const theme = (e?.detail?.theme)||'light';
+      document.documentElement.setAttribute('data-theme', theme);
+      sendThemeToIframe(theme);
+    });
+
+    // fullscreen detection
+    document.addEventListener('fullscreenchange', ()=>{
+      if(document.fullscreenElement){
+        document.documentElement.setAttribute('data-fullscreen','true');
+        setTimeout(()=>iframe.focus(),100);
+      } else {
+        document.documentElement.removeAttribute('data-fullscreen');
+      }
+    });
+
+    // iframe load → focus + theme sync
+    iframe.addEventListener('load', ()=>{
+      iframe.focus();
+      const stored = localStorage.getItem('sypher-theme') || 'light';
+      sendThemeToIframe(stored);
+    });
+
+    // popup animation
+    window.addEventListener('load', ()=>{
+      const popup = document.getElementById('loading-popup');
+      requestAnimationFrame(()=> popup.classList.add('show'));
+      setTimeout(()=>{
+        popup.classList.add('fade-out');
+        setTimeout(()=> popup.remove(),800);
+      },3000);
+    });
+
+    // message handler for iframe fullscreen request
+    window.addEventListener('message',(ev)=>{
+      try {
+        const data = ev && ev.data;
+        if(!data || data.type!=='sypher-request-fullscreen') return;
+        if(iframe.requestFullscreen) iframe.requestFullscreen();
+        else if(iframe.webkitRequestFullscreen) iframe.webkitRequestFullscreen();
+        else if(iframe.mozRequestFullScreen) iframe.mozRequestFullScreen();
+        else if(iframe.msRequestFullscreen) iframe.msRequestFullscreen();
+      } catch(e){ console.warn('Error handling sypher-request-fullscreen', e); }
+    });
+
+    if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', injectHeader);
+    else injectHeader();
+  })();
+  </script>
+</body>
+</html>

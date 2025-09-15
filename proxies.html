@@ -1,0 +1,803 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Sypher — Proxys</title>
+
+  <!-- central auth check: keeps this page protected -->
+  <script src="/autocheck.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    /* Theme vars */
+    :root {
+      --primary: #7b61ff;
+      --primary-dark: #5f3dc6;
+      --primary-light: #f5f2ff;
+      --text: #0f1724;
+      --text-muted: #6b7280;
+      --bg: linear-gradient(180deg, #fbfbfd 0%, #f7f6fb 100%);
+      --card-bg: rgba(255, 255, 255, 0.90);
+      --card-border: rgba(2, 6, 23, 0.04);
+      --card-shadow: 0 18px 70px rgba(91, 33, 182, 0.06);
+      --header-offset: 84px;
+      --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      --server-width: 220px;
+      --panel-radius: 16px;
+    }
+
+    [data-theme="dark"] {
+      --primary: #8e7bff;
+      --primary-dark: #7b61ff;
+      --primary-light: rgba(109, 40, 217, 0.12);
+      --text: #f8fafc;
+      --text-muted: #9aa3af;
+      --bg: linear-gradient(180deg, #0b0b0c 0%, #0a0a0b 100%);
+      --card-bg: rgba(255, 255, 255, 0.02);
+      --card-border: rgba(255, 255, 255, 0.04);
+      --card-shadow: 0 16px 50px rgba(0, 0, 0, 0.38);
+    }
+
+    html[data-fullscreen="true"] { --header-offset: 0px; }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      transition: var(--transition);
+    }
+
+    #header-placeholder {
+      height: var(--header-offset);
+      min-height: var(--header-offset);
+      background: var(--header-bg, #fafbff);
+      transition: background 280ms ease, height 220ms ease, opacity 220ms ease;
+      z-index: 20;
+    }
+
+    [data-theme="dark"] #header-placeholder {
+      background: #0a0a0b;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      height: calc(100vh - var(--header-offset) - 40px);
+    }
+
+    /* Tabs styling */
+    .proxy-tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 5px;
+    }
+
+    .proxy-tab {
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid transparent;
+      transition: var(--transition);
+    }
+
+    .proxy-tab:hover {
+      color: var(--primary);
+      background: rgba(123, 97, 255, 0.1);
+      transform: translateY(-2px);
+    }
+
+    .proxy-tab.active {
+      color: var(--primary);
+      background: rgba(123, 97, 255, 0.15);
+      font-weight: 700;
+      box-shadow: 0 5px 15px rgba(123, 97, 255, 0.1);
+    }
+
+    /* Main panel layout */
+    .panel-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(10px) saturate(120%);
+      -webkit-backdrop-filter: blur(10px) saturate(120%);
+      border: 1px solid var(--card-border);
+      border-radius: var(--panel-radius);
+      box-shadow: var(--card-shadow);
+      transition: var(--transition);
+      display: flex;
+      overflow: hidden;
+      flex: 1;
+      min-height: 400px;
+    }
+
+    .panel-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 25px 80px rgba(91, 33, 182, 0.12);
+    }
+
+    /* Left column with servers */
+    .servers-col {
+      width: var(--server-width);
+      min-width: var(--server-width);
+      background: transparent;
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid var(--card-border);
+    }
+
+    .servers-inner {
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      height: 100%;
+      overflow: auto;
+    }
+
+    /* Custom scrollbar */
+    .servers-inner::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .servers-inner::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .servers-inner::-webkit-scrollbar-thumb {
+      background: var(--primary);
+      border-radius: 3px;
+    }
+
+    /* Meta info section */
+    .meta-card {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      padding: 12px;
+      background: rgba(123, 97, 255, 0.05);
+      border-radius: 10px;
+      border: 1px solid var(--card-border);
+      margin-bottom: 10px;
+    }
+
+    .proxy-badge {
+      width: 45px;
+      height: 45px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--primary-light);
+      box-shadow: 0 5px 15px rgba(123, 97, 255, 0.1);
+      overflow: hidden;
+    }
+
+    .proxy-badge img {
+      width: 35px;
+      height: 35px;
+      object-fit: contain;
+    }
+
+    /* Shadow logo inversion */
+    .proxy-badge img[src*="553378_f377040db2bb4b40838d274419277a3f"] {
+      filter: brightness(0);
+    }
+    
+    [data-theme="dark"] .proxy-badge img[src*="553378_f377040db2bb4b40838d274419277a3f"] {
+      filter: brightness(0) invert(1);
+    }
+
+    .proxy-name {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    /* Servers header */
+    .servers-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .servers-title {
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--text);
+    }
+
+    /* Server items */
+    .srv-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: var(--transition);
+      border: 1px solid transparent;
+      background: transparent;
+      margin-bottom: 6px;
+    }
+
+    .srv-item:hover {
+      background: rgba(123, 97, 255, 0.1);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(123, 97, 255, 0.1);
+    }
+
+    .srv-item.active {
+      background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+      color: white;
+      box-shadow: 0 8px 20px rgba(91, 33, 182, 0.2);
+    }
+
+    .srv-label {
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: var(--text);
+      flex: 1;
+    }
+
+    .srv-item.active .srv-label {
+      color: white;
+    }
+
+    /* Copy button - enhanced */
+    .copy-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(123, 97, 255, 0.1);
+      border: 1px solid rgba(123, 97, 255, 0.2);
+      cursor: pointer;
+      transition: var(--transition);
+      color: var(--primary);
+    }
+
+    .copy-btn:hover {
+      background: var(--primary);
+      color: white;
+      transform: translateY(-2px) scale(1.1);
+      box-shadow: 0 8px 20px rgba(123, 97, 255, 0.3);
+    }
+
+    /* Iframe section - responsive */
+    .iframe-card {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: transparent;
+      min-height: 300px;
+    }
+
+    .iframe-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 15px;
+      border-bottom: 1px solid var(--card-border);
+      background: transparent;
+      flex-shrink: 0;
+    }
+
+    .iframe-title {
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .fs-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      background: transparent;
+      border: 1px solid var(--card-border);
+      color: var(--text-muted);
+      transition: var(--transition);
+      flex-shrink: 0;
+    }
+
+    .fs-btn:hover {
+      background: var(--primary);
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(123, 97, 255, 0.2);
+    }
+
+    .embed-iframe {
+      flex: 1;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      background: var(--card-bg);
+      min-height: 300px;
+    }
+
+    /* Toast notification */
+    .toast {
+      position: fixed;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: 30px;
+      padding: 10px 18px;
+      border-radius: 8px;
+      color: white;
+      background: var(--primary-dark);
+      box-shadow: 0 8px 25px rgba(91, 33, 182, 0.2);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s, transform 0.3s;
+      z-index: 9999;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(-8px);
+    }
+
+    /* Responsive design */
+    @media (max-width: 980px) {
+      .panel-card {
+        flex-direction: column;
+      }
+      
+      .servers-col {
+        width: 100%;
+        min-width: auto;
+        max-width: none;
+        border-right: 0;
+        border-bottom: 1px solid var(--card-border);
+      }
+      
+      .servers-inner {
+        height: auto;
+        max-height: 250px;
+        flex-direction: row;
+        overflow-x: auto;
+        padding-bottom: 10px;
+      }
+      
+      .meta-card {
+        min-width: 200px;
+        margin-bottom: 0;
+        margin-right: 10px;
+      }
+      
+      .servers-header {
+        display: none;
+      }
+      
+      #serversWrap {
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        padding-bottom: 5px;
+      }
+      
+      .srv-item {
+        min-width: 140px;
+        margin-bottom: 0;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .container {
+        padding: 15px;
+        height: calc(100vh - var(--header-offset) - 30px);
+      }
+      
+      .proxy-tabs {
+        overflow-x: auto;
+        padding-bottom: 8px;
+      }
+      
+      .meta-card {
+        flex-direction: column;
+        text-align: center;
+      }
+      
+      .servers-inner {
+        padding: 12px;
+      }
+      
+      .iframe-toolbar {
+        padding: 10px 12px;
+      }
+      
+      .iframe-title {
+        font-size: 0.9rem;
+      }
+    }
+
+    @media (max-height: 700px) {
+      .container {
+        height: auto;
+        min-height: calc(100vh - var(--header-offset) - 40px);
+      }
+      
+      .panel-card {
+        min-height: 300px;
+      }
+      
+      .embed-iframe {
+        min-height: 250px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="header-placeholder"></div>
+
+  <div class="container" id="mainContainer">
+    <div class="proxy-tabs" id="proxyTabs" role="tablist" aria-label="Proxy list"></div>
+
+    <div class="panel-card" role="region" aria-label="Servers and proxy viewer">
+      <!-- LEFT: meta + servers -->
+      <div class="servers-col">
+        <div class="servers-inner" id="serversInner">
+          <div class="meta-card" aria-live="polite">
+            <div class="proxy-badge" id="proxyBadge">
+              <img id="proxyLogo" src="" alt="" />
+            </div>
+            <div class="meta-info">
+              <div id="proxyName" class="proxy-name">Daydream X</div>
+            </div>
+          </div>
+
+          <div class="servers-header">
+            <div class="servers-title">Servers</div>
+          </div>
+
+          <div id="serversWrap" role="list" aria-label="Server list"></div>
+        </div>
+      </div>
+
+      <!-- RIGHT: iframe viewer -->
+      <div class="iframe-card" aria-label="Proxy viewer">
+        <div class="iframe-toolbar">
+          <div class="iframe-title" id="embedTitle">Daydream X · Server 1</div>
+          <div class="iframe-ctas">
+            <button id="localFs" class="fs-btn" title="Fullscreen iframe" aria-label="Fullscreen server">
+              <i class="fas fa-expand"></i>
+            </button>
+          </div>
+        </div>
+
+        <iframe id="siteFrame" class="embed-iframe" src="about:blank" allow="fullscreen; autoplay; picture-in-picture" title="Proxy server"></iframe>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script>
+  (function(){
+    const PROXIES = {
+      "Shadow": {
+        desc: "Shadow Browser — fast proxies, designed for bypassing restrictive filters. 10 available servers.",
+        logo: "https://static.wixstatic.com/media/553378_f377040db2bb4b40838d274419277a3f~mv2.png",
+        servers: [
+          "https://not.reconectar.cl/",
+          "https://truealgebra.k22.su/",
+          "https://vingydoodle.my-ip6.de/",
+          "https://hellisfull.ultradec.com/",
+          "https://ofgreatideas.thunder-storm.ca/",
+          "https://lifeseemsdense.oliver.adm.br/",
+          "https://indespairandunfortunate.chrishow.org/",
+          "https://andwhenilook.whenisthenextnhllockout.com/",
+          "https://andwewillrule.anarchyrules.info/",
+          "https://hellisfull.ultradec.com/"
+        ]
+      },
+      "Space": {
+        desc: "Space proxies — general purpose fast connectors for games and apps.",
+        logo: "https://static.wixstatic.com/media/553378_86635021b6564a788bd6f763f1c19f16~mv2.webp",
+        servers: [
+          "https://member.electricpiano.xyz/",
+          "https://support.helping-hands.site/",
+          "https://use.bsfa.info/",
+          "https://dash.moldeo.org/",
+          "https://use.bsfa.info/",
+          "https://dash.moldeo.org/",
+          "https://member.electricpiano.xyz/",
+          "https://search.agmlabs.com/",
+          "https://dumb.frtala.sk/",
+          "https://bruh.j82.org/"
+        ]
+      },
+      "Daydream X": {
+        desc: "Daydream X — educational & content-focused proxies.",
+        logo: "https://static.wixstatic.com/media/a3a3cf_3c39be3d575949c5ae560272b4820f75~mv2.png",
+        servers: [
+          "https://blog.electricpiano.xyz/",
+          "https://donate.helping-hands.site/",
+          "https://app.moldeo.org/",
+          "https://edu.gurdit.com/",
+          "https://blog.electricpiano.xyz/",
+          "https://study.ajhurst.org/",
+          "https://www.amp.nov.su/",
+          "https://asset.presenciatecnica.com.ar/",
+          "https://secure.farmernepal.com.np/",
+          "https://notices.drewpoldrzwi.pl/"
+        ]
+      },
+      "Rammerhead": {
+        desc: "Rammerhead — assorted high-availability endpoints.",
+        logo: "https://static.wixstatic.com/media/553378_3a405377afb34d6dbc024ee0c782086a~mv2.png",
+        servers: [
+          "https://soggycake.verymad.net/",
+          "https://lightspeedv2.imdb.gq/",
+          "https://dontbebored.bine.me/",
+          "https://mango.mustard.fpr.net/",
+          "https://oreo.lczipper.com/",
+          "https://mathlessons.rxtech.cl/",
+          "https://mathgamesunlimited.net.rxtech.cl/",
+          "https://mathgamesunlimited.net.rxtech.cl/",
+          "https://grinchgames.hub.rxtech.cl/",
+          "https://my-domains-are-better.errorrail.dev/"
+        ]
+      },
+      "Utopia": {
+        desc: "Utopia — curated endpoints for school and classroom-friendly sites.",
+        logo: "https://static.wixstatic.com/media/553378_5df48e802ecb4a5e8f9c1d3e1ccc3b44~mv2.png",
+        servers: [
+          "https://utopia.gettysburgmath.org/",
+          "https://studyschooltech.my-ip6.de/",
+          "https://andvsca-nirbyes-trash.righes.ch/",
+          "https://bombbombbombiran.ruhezeiter.ch/",
+          "https://blooket.casarosalba.com/",
+          "https://unknowcoders.root.sx/",
+          "https://blocked.goguardian.com.classroom.google.com.my.to/",
+          "https://easymathgamesfor6thgradeandup.fpr.net/",
+          "https://yoolandenmadeanother.chrismac.org/",
+          "https://classroom.google.com.my.to/"
+        ]
+      }
+    };
+
+    const proxyTabs = document.getElementById('proxyTabs');
+    const serversWrap = document.getElementById('serversWrap');
+    const siteFrame = document.getElementById('siteFrame');
+    const proxyLogoImg = document.getElementById('proxyLogo');
+    const proxyNameEl = document.getElementById('proxyName');
+    const toast = document.getElementById('toast');
+    const localFs = document.getElementById('localFs');
+    const embedTitle = document.getElementById('embedTitle');
+
+    let currentProxy = 'Daydream X';
+    let currentServerIndex = 0;
+
+    function showToast(msg, success=true){
+      toast.textContent = msg;
+      toast.classList.add('show');
+      clearTimeout(toast._t);
+      toast._t = setTimeout(()=> toast.classList.remove('show'), 1600);
+    }
+
+    function buildTabs(){
+      proxyTabs.innerHTML = '';
+      Object.keys(PROXIES).forEach((p)=>{
+        const btn = document.createElement('button');
+        btn.className = 'proxy-tab' + (p === currentProxy ? ' active' : '');
+        btn.textContent = p;
+        btn.addEventListener('click', ()=> switchProxy(p));
+        proxyTabs.appendChild(btn);
+      });
+    }
+
+    function switchProxy(p){
+      if (p === currentProxy) return;
+      currentProxy = p;
+      currentServerIndex = 0;
+      refreshProxyInfo();
+      buildServers();
+      loadCurrentServer();
+      updateEmbedTitle();
+      updateActiveTab();
+    }
+
+    function updateActiveTab(){
+      proxyTabs.querySelectorAll('.proxy-tab').forEach(btn=> btn.classList.toggle('active', btn.textContent === currentProxy));
+    }
+
+    function buildServers(){
+      serversWrap.innerHTML = '';
+      const servers = PROXIES[currentProxy].servers;
+      servers.forEach((url, idx)=>{
+        const item = document.createElement('div');
+        item.className = 'srv-item' + (idx===currentServerIndex? ' active':'');
+        item.setAttribute('role','listitem');
+
+        const left = document.createElement('div');
+        left.className = 'srv-left';
+        const label = document.createElement('div'); 
+        label.className = 'srv-label'; 
+        label.textContent = `Server ${idx+1}`; 
+        label.title = url;
+        left.appendChild(label);
+
+        item.addEventListener('click', ()=>{ 
+          currentServerIndex = idx; 
+          updateServerActive(); 
+          loadCurrentServer(); 
+        });
+
+        // Enhanced copy button
+        const copyBtn = document.createElement('button'); 
+        copyBtn.className = 'copy-btn'; 
+        copyBtn.title = 'Copy server URL';
+        copyBtn.innerHTML = '<i class="fas fa-copy"></i>';
+        copyBtn.addEventListener('click', (e)=>{ 
+          e.stopPropagation(); 
+          copyText(url); 
+        });
+
+        item.appendChild(left);
+        item.appendChild(copyBtn);
+        serversWrap.appendChild(item);
+      });
+    }
+
+    function updateServerActive(){
+      serversWrap.querySelectorAll('.srv-item').forEach((el,i)=> el.classList.toggle('active', i===currentServerIndex));
+      updateEmbedTitle();
+    }
+
+    function refreshProxyInfo(){
+      const meta = PROXIES[currentProxy];
+      proxyLogoImg.src = meta.logo || '';
+      proxyLogoImg.alt = currentProxy + ' logo';
+      proxyNameEl.textContent = currentProxy;
+    }
+
+    function updateEmbedTitle(){
+      embedTitle.textContent = `${currentProxy} · Server ${currentServerIndex+1}`;
+    }
+
+    function loadCurrentServer(){
+      const url = PROXIES[currentProxy].servers[currentServerIndex] || 'about:blank';
+      siteFrame.src = url;
+      updateServerActive();
+    }
+
+    async function requestIframeFullscreen(){
+      try {
+        const iframeEl = document.getElementById('siteFrame');
+        if (document.fullscreenElement && document.fullscreenElement === iframeEl) { 
+          await document.exitFullscreen(); 
+          return; 
+        }
+        if (iframeEl.requestFullscreen) await iframeEl.requestFullscreen();
+        document.documentElement.setAttribute('data-fullscreen','true');
+      } catch(e){ 
+        try{ 
+          await document.documentElement.requestFullscreen(); 
+          document.documentElement.setAttribute('data-fullscreen','true'); 
+        } catch(_){}
+      }
+    }
+
+    function onFullscreenChange(){ 
+      if (document.fullscreenElement) {
+        document.documentElement.setAttribute('data-fullscreen','true'); 
+      } else {
+        document.documentElement.removeAttribute('data-fullscreen'); 
+      }
+    }
+
+    function copyText(txt){
+      const toCopy = String(txt || '');
+      if (!toCopy) return showToast('Nothing to copy', false);
+      navigator.clipboard?.writeText(toCopy).then(()=> showToast('URL copied to clipboard'))
+      .catch(()=>{ 
+        const ta = document.createElement('textarea'); 
+        ta.value = toCopy; 
+        document.body.appendChild(ta); 
+        ta.select();
+        try { 
+          document.execCommand('copy'); 
+          showToast('URL copied to clipboard'); 
+        } catch(e){ 
+          showToast('Copy failed', false); 
+        }
+        ta.remove();
+      });
+    }
+
+    async function injectHeader(){
+      try {
+        const res = await fetch('./header.html', {cache:'no-cache'});
+        if(!res.ok) throw new Error('header fetch failed: ' + res.status);
+        const text = await res.text();
+        document.getElementById('header-placeholder').innerHTML = text;
+        
+        // Re-execute scripts from header
+        const temp = document.createElement('div'); 
+        temp.innerHTML = text; 
+        const scripts = temp.querySelectorAll('script');
+        for (const s of scripts){ 
+          const n = document.createElement('script'); 
+          if (s.src){ 
+            n.src = s.src; 
+            await new Promise(r=>{ 
+              n.onload=r; 
+              n.onerror=r; 
+              document.body.appendChild(n); 
+            }); 
+          } else { 
+            n.textContent = s.textContent; 
+            document.body.appendChild(n); 
+          } 
+        }
+        
+        // Apply theme
+        const stored = localStorage.getItem('sypher-theme') || 'light';
+        if(window.__sypherHeader?.applyTheme) window.__sypherHeader.applyTheme(stored);
+        document.documentElement.setAttribute('data-theme', stored);
+        refreshProxyInfo();
+      } catch(e){ 
+        console.warn('header load failed', e); 
+      }
+    }
+
+    function onThemeChange(e){ 
+      const theme = (e && e.detail && e.detail.theme) || 'light'; 
+      document.documentElement.setAttribute('data-theme', theme); 
+      refreshProxyInfo(); 
+    }
+
+    // Initialize
+    buildTabs(); 
+    refreshProxyInfo(); 
+    buildServers(); 
+    loadCurrentServer(); 
+    injectHeader();
+
+    // Event listeners
+    localFs?.addEventListener('click', requestIframeFullscreen);
+    document.addEventListener('fullscreenchange', onFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', onFullscreenChange);
+    document.addEventListener('sypher-theme-changed', onThemeChange);
+
+    // Handle window resize for better responsiveness
+    window.addEventListener('resize', function() {
+      // This ensures the iframe maintains proper dimensions
+      siteFrame.style.height = '100%';
+    });
+
+    // Expose for development
+    window.__sypherProxies = { PROXIES, loadCurrentServer, switchProxy };
+
+  })();
+  </script>
+</body>
+</html>

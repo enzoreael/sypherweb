@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script src="/autocheck.js"></script>
+  <script>
+  (function(){
+    try {
+      var KEY = 'sypher-theme';
+      var stored = null;
+      try { stored = localStorage.getItem(KEY); } catch(e){ stored = null; }
+      if (!stored) {
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) stored = 'dark';
+        else stored = 'light';
+      }
+      var disable = document.createElement('style');
+      disable.id = 'sypher-disable-transitions';
+      disable.textContent = '*{transition:none!important;animation:none!important;}';
+      (document.head || document.documentElement).appendChild(disable);
+      document.documentElement.setAttribute('data-theme', stored);
+      if (stored === 'dark') { document.documentElement.style.background='#0b0b0c'; document.documentElement.style.color='#f8fafc'; }
+      else { document.documentElement.style.background='#fbfbfd'; document.documentElement.style.color='#0f1724'; }
+      requestAnimationFrame(function(){ requestAnimationFrame(function(){
+        var el = document.getElementById('sypher-disable-transitions'); if (el && el.parentNode) el.parentNode.removeChild(el);
+        document.documentElement.style.background=''; document.documentElement.style.color='';
+      });});
+    } catch(e){}
+  })();
+  </script>
+
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Sypher — DuckMath</title>
+  <style>
+    :root{ --header-offset: 84px; }
+    html, body { height:100%; margin:0; background:transparent; }
+
+    /* header over iframe */
+    #header-placeholder{
+      position: fixed;
+      top:0;
+      left:0;
+      right:0;
+      height:var(--header-offset);
+      min-height:var(--header-offset);
+      background: #fafbff; /* fully opaque */
+      z-index: 10; 
+      opacity: 1; /* fully opaque */
+      transition: transform 300ms cubic-bezier(0.22,0.9,0.32,1), opacity 300ms ease;
+      will-change: transform, opacity;
+    }
+    [data-theme="dark"] #header-placeholder { 
+      background: #0a0a0b; /* fully opaque dark */
+    }
+
+    /* header slide up + fade in fullscreen */
+    html[data-fullscreen="true"] #header-placeholder,
+    html:has(#siteFrame:fullscreen) #header-placeholder {
+      transform: translateY(-100%);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* iframe: fills viewport; top under header initially, top:0 in fullscreen */
+    .site-iframe{
+      position:fixed;
+      top:var(--header-offset);
+      left:0;
+      right:0;
+      bottom:0;
+      width:100%;
+      height:calc(100vh - var(--header-offset));
+      border:0;
+      display:block;
+      transition: top 300ms cubic-bezier(0.22,0.9,0.32,1), height 300ms cubic-bezier(0.22,0.9,0.32,1);
+      will-change: top, height;
+    }
+    html[data-fullscreen="true"] .site-iframe {
+      top:0;
+      height:100vh;
+    }
+  </style>
+</head>
+<body>
+  <div id="header-placeholder"></div>
+
+  <iframe class="site-iframe" id="siteFrame"
+    src="https://duckmath.pages.dev/"
+    title="DuckMath"
+    loading="eager"
+    allow="fullscreen; autoplay; picture-in-picture"
+    allowfullscreen
+    webkitallowfullscreen
+    mozallowfullscreen></iframe>
+
+  <script>
+  (function(){
+    const HEADER_PATH = './header.html';
+
+    async function injectHeader(){
+      const placeholder = document.getElementById('header-placeholder');
+      try {
+        const res = await fetch(HEADER_PATH, {cache:'no-cache'});
+        if(!res.ok) throw new Error('header fetch failed: ' + res.status);
+        const text = await res.text();
+        placeholder.innerHTML = text;
+
+        const temp = document.createElement('div'); temp.innerHTML = text;
+        const scripts = temp.querySelectorAll('script');
+        for(const s of scripts){
+          const newScript = document.createElement('script');
+          if(s.src){
+            newScript.src = s.src;
+            await new Promise(r=>{ newScript.onload=r; newScript.onerror=r; document.body.appendChild(newScript); });
+          } else {
+            newScript.textContent = s.textContent;
+            document.body.appendChild(newScript);
+          }
+        }
+
+        const stored = localStorage.getItem('sypher-theme') || 'light';
+        if(window.__sypherHeader?.applyTheme) window.__sypherHeader.applyTheme(stored);
+        document.documentElement.setAttribute('data-theme', stored);
+      } catch(e){ console.warn('header load failed', e); }
+    }
+
+    document.addEventListener('sypher-theme-changed', e=>{
+      const theme = (e?.detail?.theme) || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+    });
+
+    function updateFSAttr(){
+      const fe =
+        document.fullscreenElement ||
+        document.webkitFullscreenElement ||
+        document.mozFullScreenElement ||
+        document.msFullscreenElement;
+      if (fe) document.documentElement.setAttribute('data-fullscreen','true');
+      else document.documentElement.removeAttribute('data-fullscreen');
+    }
+    ['fullscreenchange','webkitfullscreenchange','mozfullscreenchange','MSFullscreenChange']
+      .forEach(evt => document.addEventListener(evt, updateFSAttr, false));
+    updateFSAttr();
+
+    if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', injectHeader);
+    else injectHeader();
+  })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- central auth check -->
+  <script src="/autocheck.js"></script>
+
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Sypher — DuckMath</title>
+  <style>
+    :root { --header-offset: 84px; }
+
+    html,body { height:100%; margin:0; background:transparent; overflow:hidden; }
+
+    #header-placeholder{
+      height:var(--header-offset);
+      min-height:var(--header-offset);
+      background:var(--header-bg, #fafbff);
+      transition: background 280ms ease, height 220ms ease, opacity 220ms ease;
+      z-index:10;
+      opacity:1;
+    }
+    [data-theme="dark"] #header-placeholder { background:#0a0a0b; }
+
+    /* Fullscreen mode — fade out header */
+    html[data-fullscreen="true"] #header-placeholder{
+      opacity:0;
+      height:0;
+      min-height:0;
+      pointer-events:none;
+    }
+
+    .site-iframe{
+      position:fixed;
+      top:var(--header-offset);
+      left:0; right:0; bottom:0;
+      width:100%;
+      height:calc(100vh - var(--header-offset));
+      border:0;
+      display:block;
+      z-index:1;
+      transition: top 220ms ease, height 220ms ease;
+    }
+
+    /* Fullscreen iframe: take the whole viewport */
+    html[data-fullscreen="true"] .site-iframe{
+      top:0;
+      height:100vh;
+    }
+  </style>
+</head>
+<body>
+  <div id="header-placeholder"></div>
+
+  <iframe class="site-iframe" id="siteFrame"
+    src="https://sypher-1-12-2-eaglercraft-client.onrender.com/"
+    title="DuckMath"
+    loading="eager"
+    allow="fullscreen; autoplay; picture-in-picture; keyboard-map"
+    tabindex="0"></iframe>
+
+  <script>
+  (function(){
+    const iframe = document.getElementById('siteFrame');
+    const HEADER_PATH = './header.html';
+
+    async function injectHeader(){
+      const placeholder = document.getElementById('header-placeholder');
+      try {
+        const res = await fetch(HEADER_PATH, {cache:'no-cache'});
+        const text = await res.text();
+        placeholder.innerHTML = text;
+
+        // re-execute scripts from header.html
+        const temp = document.createElement('div'); 
+        temp.innerHTML = text;
+        const scripts = temp.querySelectorAll('script');
+        for(const s of scripts){
+          const newScript = document.createElement('script');
+          if(s.src){
+            newScript.src = s.src;
+            await new Promise(r=>{ 
+              newScript.onload=r; 
+              newScript.onerror=r; 
+              document.body.appendChild(newScript); 
+            });
+          } else {
+            newScript.textContent = s.textContent;
+            document.body.appendChild(newScript);
+          }
+        }
+
+        // apply stored theme
+        const stored = localStorage.getItem('sypher-theme') || 'light';
+        if(window.__sypherHeader?.applyTheme) window.__sypherHeader.applyTheme(stored);
+        document.documentElement.setAttribute('data-theme', stored);
+        sendThemeToIframe(stored);
+      } catch(e){ 
+        console.warn('header load failed', e); 
+      }
+    }
+
+    function sendThemeToIframe(theme){
+      try {
+        iframe.contentWindow.postMessage({ type:'theme-change', theme }, "*");
+      } catch(e){}
+    }
+
+    // listen for theme changes from header
+    document.addEventListener('sypher-theme-changed', e=>{
+      const theme = (e?.detail?.theme) || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+      sendThemeToIframe(theme);
+    });
+
+    // fullscreen detection (with smooth fade)
+    document.addEventListener('fullscreenchange', ()=>{
+      if(document.fullscreenElement){
+        document.documentElement.setAttribute('data-fullscreen','true');
+        setTimeout(()=>iframe.focus(), 100);
+      } else {
+        document.documentElement.removeAttribute('data-fullscreen');
+      }
+    });
+
+    // focus + sync theme on first iframe load
+    iframe.addEventListener('load', ()=>{
+      iframe.focus();
+      const stored = localStorage.getItem('sypher-theme') || 'light';
+      sendThemeToIframe(stored); // ✅ ensures correct theme is applied right away
+    });
+
+    // click anywhere on iframe container → forward focus
+    iframe.addEventListener('click', ()=>{ iframe.focus(); });
+
+    if(document.readyState === 'loading') 
+      document.addEventListener('DOMContentLoaded', injectHeader);
+    else 
+      injectHeader();
+  })();
+  </script>
+</body>
+</html>

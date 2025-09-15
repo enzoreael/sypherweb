@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- THEME BOOT SNIPPET: put this as the VERY FIRST element in head -->
+  <script>
+  (function(){
+    try {
+      var KEY = 'sypher-theme';
+      var stored = null;
+      try { stored = localStorage.getItem(KEY); } catch(e){ stored = null; }
+      if (!stored) {
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) stored = 'dark';
+        else stored = 'light';
+      }
+      var disable = document.createElement('style');
+      disable.id = 'sypher-disable-transitions';
+      disable.textContent = '*{transition:none!important;animation:none!important;}';
+      (document.head || document.documentElement).appendChild(disable);
+      document.documentElement.setAttribute('data-theme', stored);
+      if (stored === 'dark') {
+        document.documentElement.style.background = '#0b0b0c';
+        document.documentElement.style.color = '#f8fafc';
+        var meta = document.querySelector('meta[name="theme-color"]') || document.createElement('meta');
+        meta.setAttribute('name','theme-color'); meta.setAttribute('content','#0b0b0c');
+        if (!document.querySelector('meta[name="theme-color"]')) document.head.appendChild(meta);
+      } else {
+        document.documentElement.style.background = '#fbfbfd';
+        document.documentElement.style.color = '#0f1724';
+        var meta2 = document.querySelector('meta[name="theme-color"]') || document.createElement('meta');
+        meta2.setAttribute('name','theme-color'); meta2.setAttribute('content','#fbfbfd');
+        if (!document.querySelector('meta[name="theme-color"]')) document.head.appendChild(meta2);
+      }
+      requestAnimationFrame(function(){ requestAnimationFrame(function(){
+        var el = document.getElementById('sypher-disable-transitions');
+        if (el && el.parentNode) el.parentNode.removeChild(el);
+        document.documentElement.style.background = '';
+        document.documentElement.style.color = '';
+      });});
+    } catch(e){}
+  })();
+  </script>
+
+  <!-- CENTRAL AUTH CHECK (autocheck.js) -->
+  <script src="/autocheck.js"></script>
+
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Sypher — Secure Unblocked Gaming Platform</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary: #7b61ff;
+      --primary-dark: #5f3dc6;
+      --primary-light: #f5f2ff;
+      --text: #0f1724;
+      --text-muted: #6b7280;
+      --bg: linear-gradient(180deg, #fbfbfd 0%, #f7f6fb 100%);
+      --card-bg: rgba(255, 255, 255, 0.90);
+      --card-border: rgba(2, 6, 23, 0.04);
+      --card-shadow: 0 18px 70px rgba(91, 33, 182, 0.06);
+      --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      /* keep the header offset you use on proxy.html */
+      --header-offset: 84px;
+    }
+
+    [data-theme="dark"] {
+      --primary: #8e7bff;
+      --primary-dark: #7b61ff;
+      --primary-light: rgba(109, 40, 217, 0.12);
+      --text: #f8fafc;
+      --text-muted: #9aa3af;
+      --bg: linear-gradient(180deg, #0b0b0c 0%, #0a0a0b 100%);
+      --card-bg: rgba(255, 255, 255, 0.02);
+      --card-border: rgba(255, 255, 255, 0.04);
+      --card-shadow: 0 16px 50px rgba(0, 0, 0, 0.38);
+    }
+
+    /* allow pages to set header to zero when using fullscreen (same behavior as proxy.html) */
+    html[data-fullscreen="true"]{ --header-offset: 0px; }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    /* Make page sizing consistent with proxies.html (important for header width/alignment) */
+    html, body { height: 100%; margin: 0; background: var(--bg); -webkit-font-smoothing: antialiased; }
+
+    body {
+      color: var(--text);
+      transition: var(--transition);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* --------- HEADER: copied behaviour from proxies.html (fixed, full-width) --------- */
+    #header-placeholder{
+      position: fixed;
+      top:0;
+      left:0;
+      right:0;
+      height:var(--header-offset);
+      min-height:var(--header-offset);
+      background: var(--header-bg, #fafbff); /* fully opaque */
+      z-index: 20;
+      opacity: 1;
+      transition: transform 300ms cubic-bezier(0.22,0.9,0.32,1), opacity 300ms ease;
+      will-change: transform, opacity;
+    }
+    [data-theme="dark"] #header-placeholder { background: #0a0a0b; }
+
+    /* header slide up + fade in fullscreen (same as proxies.html) */
+    html[data-fullscreen="true"] #header-placeholder,
+    html:has(#siteFrame:fullscreen) #header-placeholder {
+      transform: translateY(-100%);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* push page content down so the fixed header doesn't overlap it (matches proxies layout) */
+    .container {
+      max-width: 1200px;
+      margin: calc(var(--header-offset) + 18px) auto 0; /* top margin uses header offset */
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    /* --------------------------------------------------------------------------------- */
+    /* Hero Section - Centered Content */
+    .hero {
+      background: var(--card-bg);
+      backdrop-filter: blur(10px) saturate(120%);
+      -webkit-backdrop-filter: blur(10px) saturate(120%);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 60px 50px;
+      margin: 30px 0;
+      text-align: center;
+      box-shadow: var(--card-shadow);
+      transition: var(--transition);
+    }
+
+    .hero:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 25px 80px rgba(91, 33, 182, 0.12);
+    }
+
+    .hero-content {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .hero-title {
+      font-size: 3.2rem;
+      font-weight: 800;
+      margin-bottom: 20px;
+      background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      line-height: 1.2;
+    }
+
+    .hero-subtitle {
+      font-size: 1.2rem;
+      color: var(--text-muted);
+      margin-bottom: 30px;
+      max-width: 700px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .hero-ctas {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .cta-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 15px 30px;
+      border-radius: 50px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: var(--transition);
+      border: none;
+      cursor: pointer;
+    }
+
+    .cta-primary {
+      background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+      color: white;
+      box-shadow: 0 10px 25px rgba(91, 33, 182, 0.3);
+    }
+
+    .cta-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 35px rgba(91, 33, 182, 0.4);
+    }
+
+    .cta-secondary {
+      background: transparent;
+      color: var(--primary);
+      border: 2px solid var(--primary);
+    }
+
+    .cta-secondary:hover {
+      background: var(--primary);
+      color: white;
+    }
+
+    /* Platform Sections */
+    .platform-section {
+      margin: 60px 0;
+    }
+
+    .section-title {
+      font-size: 2.2rem;
+      margin-bottom: 30px;
+      position: relative;
+      display: inline-block;
+      transition: var(--transition);
+    }
+
+    .section-title:hover {
+      transform: translateX(5px);
+    }
+
+    .section-title::after {
+      content: '';
+      display: block;
+      width: 60px;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary), transparent);
+      margin-top: 10px;
+      border-radius: 2px;
+      transition: var(--transition);
+    }
+
+    .section-title:hover::after {
+      width: 100px;
+    }
+
+    .platform-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 25px;
+    }
+
+    .platform-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 15px;
+      padding: 30px;
+      transition: var(--transition);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      height: 100%;
+    }
+
+    .platform-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    }
+
+    .platform-icon {
+      font-size: 2.5rem;
+      margin-bottom: 20px;
+      background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      transition: var(--transition);
+      display: inline-block;
+    }
+
+    .platform-card:hover .platform-icon {
+      transform: scale(1.2);
+    }
+
+    .platform-name {
+      font-size: 1.4rem;
+      margin-bottom: 15px;
+      color: var(--text);
+      transition: var(--transition);
+    }
+
+    .platform-card:hover .platform-name {
+      color: var(--primary);
+    }
+
+    .platform-description {
+      color: var(--text-muted);
+      font-size: 1rem;
+      margin-bottom: 20px;
+      transition: var(--transition);
+    }
+
+    .platform-card:hover .platform-description {
+      color: var(--text);
+    }
+
+    .feature-list {
+      list-style-type: none;
+      margin-top: 20px;
+    }
+
+    .feature-list li {
+      margin-bottom: 10px;
+      display: flex;
+      align-items: flex-start;
+      transition: var(--transition);
+    }
+
+    .feature-list li:hover {
+      transform: translateX(5px);
+    }
+
+    .feature-list li i {
+      color: var(--primary);
+      margin-right: 10px;
+      margin-top: 4px;
+      transition: var(--transition);
+    }
+
+    .feature-list li:hover i {
+      transform: scale(1.2);
+    }
+
+    /* Features Grid */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 25px;
+      margin: 60px 0;
+    }
+
+    .feature-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 15px;
+      padding: 30px;
+      transition: var(--transition);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    .feature-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    }
+
+    .feature-icon {
+      font-size: 2.5rem;
+      margin-bottom: 20px;
+      background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      transition: var(--transition);
+      display: inline-block;
+    }
+
+    .feature-card:hover .feature-icon {
+      transform: scale(1.2);
+    }
+
+    .feature-title {
+      font-size: 1.4rem;
+      margin-bottom: 15px;
+      color: var(--text);
+      transition: var(--transition);
+    }
+
+    .feature-card:hover .feature-title {
+      color: var(--primary);
+    }
+
+    .feature-description {
+      color: var(--text-muted);
+      font-size: 1rem;
+      transition: var(--transition);
+    }
+
+    .feature-card:hover .feature-description {
+      color: var(--text);
+    }
+
+    /* Disclaimer */
+    .disclaimer {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 15px;
+      padding: 25px;
+      margin-top: 40px;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      transition: var(--transition);
+    }
+
+    .disclaimer:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+    }
+
+    .disclaimer-title {
+      font-weight: 600;
+      margin-bottom: 10px;
+      color: var(--primary);
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 30px 0;
+      margin-top: 60px;
+      color: var(--text-muted);
+      border-top: 1px solid var(--card-border);
+      transition: var(--transition);
+    }
+
+    footer:hover {
+      color: var(--text);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 980px) {
+      .platform-grid, .features-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 640px) {
+      .hero-title {
+        font-size: 2.5rem;
+      }
+      
+      .hero {
+        padding: 30px;
+      }
+      
+      .platform-grid, .features-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .hero-ctas {
+        justify-content: center;
+      }
+      
+      .cta-button {
+        padding: 12px 25px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="header-placeholder"></div>
+
+  <div class="container">
+    <section class="hero">
+      <div class="hero-content">
+        <h1 class="hero-title">Stealth Gaming — Fast, Low-Detect Unblocked Platforms</h1>
+        <p class="hero-subtitle">Sypher delivers secure access to DuckMath games, Eaglercraft Minecraft, and private chat through about:blank contexts to minimize detection in restricted networks.</p>
+        
+        <div class="hero-ctas">
+          <a href="./nettleweb.html" class="cta-button cta-primary">
+            <i class="fas fa-globe"></i> NettleWeb
+          </a>
+          <a href="./duckmath.html" class="cta-button cta-primary">
+            <i class="fas fa-gamepad"></i> DuckMath Games
+          </a>
+          <a href="./chat.html" class="cta-button cta-secondary">
+            <i class="fas fa-comments"></i> Private Chatroom
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section class="platform-section">
+      <h2 class="section-title">Our Platforms</h2>
+      
+      <div class="platform-grid">
+        <div class="platform-card">
+          <div class="platform-icon">
+            <i class="fas fa-gamepad"></i>
+          </div>
+          <h3 class="platform-name">DuckMath Games</h3>
+          <p class="platform-description">250+ unblocked games across action, puzzle, sports, and platformer genres with minimal ads and frequent updates.</p>
+          
+          <ul class="feature-list">
+            <li><i class="fas fa-check-circle"></i> Fast, lightweight pages optimized for performance</li>
+            <li><i class="fas fa-check-circle"></i> Proxies & cloak mode to bypass network restrictions</li>
+            <li><i class="fas fa-check-circle"></i> Mirror links and Discord community for access</li>
+            <li><i class="fas fa-check-circle"></i> Free with non-intrusive advertising</li>
+          </ul>
+        </div>
+        
+        <div class="platform-card">
+          <div class="platform-icon">
+            <i class="fas fa-cube"></i>
+          </div>
+          <h3 class="platform-name">Eaglercraft 1.12.2</h3>
+          <p class="platform-description">Browser-based Minecraft running via JavaScript/WebAssembly with OpenGL emulation for full voxel gameplay.</p>
+          
+          <ul class="feature-list">
+            <li><i class="fas fa-check-circle"></i> Complete Minecraft experience in your browser</li>
+            <li><i class="fas fa-check-circle"></i> Cross-platform support (desktop and mobile)</li>
+            <li><i class="fas fa-check-circle"></i> Multiple version support (1.12.2, 1.8.8, etc.)</li>
+            <li><i class="fas fa-check-circle"></i> WebAssembly builds for better performance</li>
+          </ul>
+        </div>
+        
+        <div class="platform-card">
+          <div class="platform-icon">
+            <i class="fas fa-comment-dots"></i>
+          </div>
+          <h3 class="platform-name">Private Chatroom</h3>
+          <p class="platform-description">Secure, private chatroom for anonymous messaging and communication with end-to-end encryption.</p>
+          
+          <ul class="feature-list">
+            <li><i class="fas fa-check-circle"></i> End-to-end encryption for privacy</li>
+            <li><i class="fas fa-check-circle"></i> No message persistence (truly ephemeral)</li>
+            <li><i class="fas fa-check-circle"></i> Anonymous usage without registration</li>
+            <li><i class="fas fa-check-circle"></i> Simple and intuitive interface</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <h2 class="section-title">Why Choose Sypher</h2>
+    
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fas fa-shield-alt"></i>
+        </div>
+        <h3 class="feature-title">about:blank Security</h3>
+        <p class="feature-description">Content opens in secure contexts to reduce detection on school networks and minimize browsing history footprint.</p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fas fa-user-secret"></i>
+        </div>
+        <h3 class="feature-title">Privacy Focused</h3>
+        <p class="feature-description">We prioritize your privacy with minimal data collection and secure connections for all our platforms.</p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fas fa-bolt"></i>
+        </div>
+        <h3 class="feature-title">Optimized Performance</h3>
+        <p class="feature-description">Lightweight interfaces designed for low-latency gameplay with minimal resource usage on restricted networks.</p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fas fa-sync-alt"></i>
+        </div>
+        <h3 class="feature-title">Regular Updates</h3>
+        <p class="feature-description">We continuously update our platforms to ensure compatibility and access despite network restrictions.</p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fas fa-plug"></i>
+        </div>
+        <h3 class="feature-title">Fallback Options</h3>
+        <p class="feature-description">Multiple access methods including mirrors, proxies, and Discord community for when primary access is blocked.</p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fas fa-hand-holding-heart"></i>
+        </div>
+        <h3 class="feature-title">Community Support</h3>
+        <p class="feature-description">Active community helping with access issues and providing guidance on using our platforms safely.</p>
+      </div>
+    </div>
+
+    <div class="disclaimer">
+      <div class="disclaimer-title">Disclaimer</div>
+      <p>Sypher is a secure launcher platform and does not own or operate any of the services provided. We are not responsible for the content on NettleWeb, DuckMath Games, Eaglercraft, or the Private Chatroom. These are third-party services that we provide access to through our secure platform.</p>
+    </div>
+
+    <footer>
+      © <span id="year"></span> Sypher — Built with privacy in mind. Please use responsibly and respect your network's policies.
+    </footer>
+  </div>
+
+  <script>
+  (function(){
+    async function injectHeader(){
+      const placeholder = document.getElementById('header-placeholder');
+      if(!placeholder) return;
+      try {
+        const res = await fetch('./header.html', {cache:'no-cache'});
+        if(!res.ok) throw new Error('header fetch failed: ' + res.status);
+        const text = await res.text();
+        placeholder.innerHTML = text;
+
+        const temp = document.createElement('div');
+        temp.innerHTML = text;
+        const scripts = temp.querySelectorAll('script');
+        for (const s of scripts) {
+          const newScript = document.createElement('script');
+          if (s.src) {
+            newScript.src = s.src;
+            await new Promise((resolve) => { newScript.onload = resolve; newScript.onerror = resolve; document.body.appendChild(newScript); });
+          } else {
+            newScript.textContent = s.textContent;
+            document.body.appendChild(newScript);
+          }
+        }
+
+        if (window.__sypherHeader) {
+          try { window.__sypherHeader.markActiveNav(); } catch(e){}
+          try {
+            const stored = localStorage.getItem('sypher-theme') || (document.documentElement.getAttribute('data-theme') || 'light');
+            window.__sypherHeader.applyTheme(stored);
+          } catch(e){}
+        }
+      } catch (err) { console.warn('Could not load header:', err); }
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', injectHeader);
+    else injectHeader();
+  })();
+  </script>
+
+  <script> document.getElementById('year').textContent = new Date().getFullYear(); </script>
+
+  <script>
+    document.addEventListener('sypher-theme-changed', (e)=>{
+      const theme = (e && e.detail && e.detail.theme) || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+    });
+  </script>
+</body>
+</html>

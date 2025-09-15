@@ -1,0 +1,698 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Sypher — License Activation</title>
+  <link rel="icon" href="https://www.google.com/s2/favicons?sz=256&domain_url=https%3A%2F%2Fgoogle.com">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #7b61ff;
+      --primary-dark: #5f3dc6;
+      --primary-light: #f5f2ff;
+      --text: #0f1724;
+      --text-muted: #6b7280;
+      --error: #ff4757;
+      --error-light: #ffe6e9;
+      --success: #4caf50;
+      --success-light: #e8f5e9;
+      --bg: linear-gradient(180deg, #fbfbfd 0%, #f7f6fb 100%);
+      --card-bg: rgba(255, 255, 255, 0.90);
+      --card-border: rgba(2, 6, 23, 0.04);
+      --card-shadow: 0 18px 70px rgba(91, 33, 182, 0.06);
+      --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      transition: var(--transition);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 600px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .auth-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(10px) saturate(120%);
+      -webkit-backdrop-filter: blur(10px) saturate(120%);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: var(--card-shadow);
+      transition: var(--transition);
+      text-align: center;
+    }
+
+    .auth-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 25px 80px rgba(91, 33, 182, 0.12);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+
+    .brand-logo {
+      width: 60px;
+      height: 60px;
+      border-radius: 12px;
+      transition: var(--transition);
+    }
+
+    .brand-text {
+      text-align: left;
+    }
+
+    .brand-title {
+      font-size: 2.2rem;
+      font-weight: 800;
+      background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      line-height: 1.1;
+      margin-bottom: 5px;
+      padding-bottom: 2px;
+    }
+
+    .brand-subtitle {
+      font-size: 1rem;
+      color: var(--text-muted);
+    }
+
+    .auth-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: var(--text);
+    }
+
+    .auth-subtitle {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      margin-bottom: 30px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 16px 20px;
+      border-radius: 12px;
+      border: 1px solid var(--card-border);
+      background: rgba(255, 255, 255, 0.7);
+      font-size: 1rem;
+      transition: var(--transition);
+      box-shadow: 0 8px 20px rgba(12, 10, 22, 0.06);
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(123, 97, 255, 0.3);
+      transform: translateY(-2px);
+    }
+
+    .form-input.error {
+      border-color: var(--error);
+      background-color: var(--error-light);
+      animation: pulseError 0.5s ease-in-out;
+    }
+
+    .license-input {
+      letter-spacing: 1px;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .username-input {
+      text-align: left;
+    }
+
+    .char-count {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-align: right;
+      margin-top: 5px;
+    }
+
+    .status-message {
+      padding: 12px 16px;
+      border-radius: 10px;
+      margin: 15px 0;
+      font-weight: 500;
+      display: none;
+    }
+
+    .status-success {
+      background: var(--success-light);
+      color: var(--success);
+      border: 1px solid rgba(76, 175, 80, 0.3);
+    }
+
+    .status-error {
+      background: var(--error-light);
+      color: var(--error);
+      border: 1px solid rgba(244, 67, 54, 0.3);
+    }
+
+    .status-warning {
+      background: rgba(255, 152, 0, 0.15);
+      color: #f57c00;
+      border: 1px solid rgba(255, 152, 0, 0.3);
+    }
+
+    .status-info {
+      background: rgba(33, 150, 243, 0.15);
+      color: #1976d2;
+      border: 1px solid rgba(33, 150, 243, 0.3);
+    }
+
+    .actions {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      margin-top: 25px;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border-radius: 12px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn.ghost {
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--card-border);
+    }
+
+    .btn.ghost:hover {
+      background: rgba(123, 97, 255, 0.05);
+      color: var(--primary);
+      transform: translateY(-2px);
+    }
+
+    .btn.primary {
+      background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+      color: white;
+      box-shadow: 0 8px 20px rgba(91, 33, 182, 0.2);
+    }
+
+    .btn.primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 25px rgba(91, 33, 182, 0.3);
+    }
+
+    .btn:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    .hint {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-top: 20px;
+    }
+
+    .certificate-status {
+      margin: 20px 0;
+      padding: 15px;
+      border-radius: 10px;
+      background: rgba(123, 97, 255, 0.1);
+      border: 1px solid rgba(123, 97, 255, 0.2);
+    }
+
+    .certificate-status h3 {
+      margin-bottom: 10px;
+      color: var(--primary);
+    }
+
+    .certificate-details {
+      text-align: left;
+      font-size: 0.9rem;
+    }
+
+    .certificate-details div {
+      margin-bottom: 5px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .certificate-details span {
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    @keyframes pulseError {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.02); background-color: rgba(255, 71, 87, 0.2); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+      20%, 40%, 60%, 80% { transform: translateX(10px); }
+    }
+
+    .shake {
+      animation: shake 0.6s cubic-bezier(.36,.07,.19,.97) both;
+    }
+
+    @media (max-width: 520px) {
+      .auth-card {
+        padding: 30px 20px;
+      }
+      
+      .brand-title {
+        font-size: 1.8rem;
+      }
+      
+      .auth-title {
+        font-size: 1.5rem;
+      }
+      
+      .actions {
+        flex-direction: column;
+      }
+      
+      .btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="auth-card" role="dialog" aria-labelledby="certificate-title" aria-describedby="certificate-desc">
+      <div class="brand">
+        <img class="brand-logo" src="https://static.wixstatic.com/media/a3a3cf_7fe0f60fa9d94a88ac2beaa6a9c41e6f~mv2.png" alt="Sypher logo">
+        <div class="brand-text">
+          <div class="brand-title">Sypher</div>
+          <div class="brand-subtitle">License Activation</div>
+        </div>
+      </div>
+
+      <h1 id="certificate-title" class="auth-title">Device License</h1>
+      <p id="certificate-desc" class="auth-subtitle">Enter your username and license key to activate this device.</p>
+
+      <div id="existingLicense" class="certificate-status" style="display: none;">
+        <h3><i class="fas fa-certificate"></i> Device Already Licensed</h3>
+        <div class="certificate-details">
+          <div>License ID: <span id="licenseId"></span></div>
+          <div>Username: <span id="userName"></span></div>
+          <div>Activated: <span id="licenseDate"></span></div>
+          <div>Status: <span id="licenseStatus" style="color: #4caf50;">Active</span></div>
+        </div>
+      </div>
+
+      <div id="activationForm">
+        <div class="form-group">
+          <label for="usernameInput" class="form-label">Username (max 10 characters)</label>
+          <input type="text" id="usernameInput" class="form-input username-input" placeholder="Enter your username" maxlength="10">
+          <div class="char-count"><span id="charCount">0</span>/10 characters</div>
+        </div>
+
+        <div class="form-group">
+          <label for="licenseKey" class="form-label">License Key</label>
+          <input type="text" id="licenseKey" class="form-input license-input" placeholder="XXXX-XXXX-XXXX-XXXX" maxlength="19">
+        </div>
+
+        <div id="statusMessage" class="status-message"></div>
+
+        <div class="actions">
+          <button id="activateBtn" class="btn primary">
+            <i class="fas fa-certificate"></i> Activate License
+          </button>
+        </div>
+      </div>
+
+      <div id="activatedSection" style="display: none;">
+        <div class="status-message status-success">
+          <i class="fas fa-check-circle"></i> License activated successfully!
+        </div>
+        
+        <div class="certificate-details" style="margin: 20px 0;">
+          <div>License: <span id="activatedLicenseKey"></span></div>
+          <div>Username: <span id="activatedUserName"></span></div>
+          <div>Device: <span id="activatedDeviceId"></span></div>
+          <div>Activated: <span id="activatedDate"></span></div>
+        </div>
+
+        <div class="actions">
+          <button id="continueBtn" class="btn primary">
+            <i class="fas fa-check-circle"></i> Continue to Sypher
+          </button>
+        </div>
+      </div>
+
+      <div class="hint">Your license is tied to this device. Contact admin to transfer to a different device.</div>
+    </div>
+  </div>
+
+  <!-- Load Supabase client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+  // Supabase configuration
+  const SUPABASE_URL = 'https://nmhrxkekmimvxvadeera.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5taHJ4a2VrbWltdnh2YWRlZXJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc5NTQ0MzIsImV4cCI6MjA3MzUzMDQzMn0.KMjmo94xtRzN7XZ7j-cbkeOyFDjviX2xouPUwiAwaRo';
+  
+  // Initialize Supabase client
+  const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  
+  (function(){
+    const usernameInput = document.getElementById('usernameInput');
+    const licenseInput = document.getElementById('licenseKey');
+    const activateBtn = document.getElementById('activateBtn');
+    const continueBtn = document.getElementById('continueBtn');
+    const statusMessage = document.getElementById('statusMessage');
+    const existingLicense = document.getElementById('existingLicense');
+    const activationForm = document.getElementById('activationForm');
+    const activatedSection = document.getElementById('activatedSection');
+    const charCount = document.getElementById('charCount');
+    
+    // Format license key input (XXXX-XXXX-XXXX-XXXX)
+    licenseInput.addEventListener('input', function(e) {
+      const input = e.target.value.replace(/-/g, '');
+      let formatted = '';
+      
+      for (let i = 0; i < input.length; i++) {
+        if (i > 0 && i % 4 === 0) formatted += '-';
+        formatted += input[i];
+      }
+      
+      e.target.value = formatted.toUpperCase();
+    });
+    
+    // Update character count for username
+    usernameInput.addEventListener('input', function() {
+      charCount.textContent = usernameInput.value.length;
+      
+      if (usernameInput.value.length > 10) {
+        usernameInput.value = usernameInput.value.substring(0, 10);
+        charCount.textContent = 10;
+      }
+    });
+    
+    // Check if device already has a license
+    function checkExistingLicense() {
+      const deviceId = getDeviceId();
+      const savedLicense = localStorage.getItem('sypher_license');
+      
+      if (savedLicense) {
+        try {
+          const licenseData = JSON.parse(savedLicense);
+          
+          // Verify the license is still valid with the server
+          verifyLicense(licenseData.key, deviceId)
+            .then(isValid => {
+              if (isValid) {
+                showExistingLicense(licenseData);
+              } else {
+                // License is no longer valid, clear local storage
+                localStorage.removeItem('sypher_license');
+                localStorage.removeItem('sypher_device_id');
+                activationForm.style.display = 'block';
+              }
+            })
+            .catch(error => {
+              console.error('Error verifying license:', error);
+              activationForm.style.display = 'block';
+            });
+        } catch (e) {
+          console.error('Error parsing saved license:', e);
+          activationForm.style.display = 'block';
+        }
+      } else {
+        activationForm.style.display = 'block';
+      }
+    }
+    
+    // Show existing license details
+    function showExistingLicense(licenseData) {
+      existingLicense.style.display = 'block';
+      document.getElementById('licenseId').textContent = formatLicenseKey(licenseData.key);
+      document.getElementById('userName').textContent = licenseData.username;
+      document.getElementById('licenseDate').textContent = new Date(licenseData.activated_at).toLocaleDateString();
+      activationForm.style.display = 'none';
+    }
+    
+    // Show status message
+    function showStatus(message, type) {
+      statusMessage.textContent = message;
+      statusMessage.className = `status-message status-${type}`;
+      statusMessage.style.display = 'block';
+    }
+    
+    // Hide status message
+    function hideStatus() {
+      statusMessage.style.display = 'none';
+    }
+    
+    // Get device ID (generates a fingerprint based on device characteristics)
+    function getDeviceId() {
+      let deviceId = localStorage.getItem('sypher_device_id');
+      
+      if (!deviceId) {
+        // Create a device fingerprint
+        const navigatorInfo = navigator.userAgent + navigator.language + navigator.hardwareConcurrency;
+        const screenInfo = screen.width + screen.height + screen.colorDepth;
+        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        
+        // Create a simple hash
+        let hash = 0;
+        const str = navigatorInfo + screenInfo + timezone;
+        
+        for (let i = 0; i < str.length; i++) {
+          const char = str.charCodeAt(i);
+          hash = ((hash << 5) - hash) + char;
+          hash = hash & hash; // Convert to 32bit integer
+        }
+        
+        deviceId = 'device_' + Math.abs(hash).toString(16);
+        localStorage.setItem('sypher_device_id', deviceId);
+      }
+      
+      return deviceId;
+    }
+    
+    // Get IP address using a third-party service
+    async function getIPAddress() {
+      try {
+        const response = await fetch('https://api.ipify.org?format=json');
+        const data = await response.json();
+        return data.ip;
+      } catch (error) {
+        console.error('Error getting IP address:', error);
+        return 'unknown';
+      }
+    }
+    
+    // Get screen info
+    function getScreenInfo() {
+      return `${screen.width}x${screen.height} (${screen.colorDepth}bit)`;
+    }
+    
+    // Format license key for display
+    function formatLicenseKey(key) {
+      if (!key) return 'N/A';
+      return key.replace(/(.{4})/g, '$1-').slice(0, 19);
+    }
+    
+    // Verify license with server
+    async function verifyLicense(licenseKey, deviceId) {
+      try {
+        const { data, error } = await supabase
+          .from('licenses')
+          .select('*')
+          .eq('license_key', licenseKey.replace(/-/g, ''))
+          .eq('device_fingerprint', deviceId)
+          .eq('is_active', true)
+          .single();
+          
+        if (error) {
+          console.error('Error verifying license:', error);
+          return false;
+        }
+        
+        return !!data;
+      } catch (error) {
+        console.error('Error verifying license:', error);
+        return false;
+      }
+    }
+    
+    // Activate license
+    async function activateLicense(key, username) {
+      const deviceId = getDeviceId();
+      const ipAddress = await getIPAddress();
+      const screenInfo = getScreenInfo();
+      const userAgent = navigator.userAgent;
+      
+      try {
+        // Check if license exists and is available
+        const { data: licenseData, error: checkError } = await supabase
+          .from('licenses')
+          .select('*')
+          .eq('license_key', key.replace(/-/g, ''))
+          .single();
+          
+        if (checkError) {
+          throw new Error('License not found or already in use');
+        }
+        
+        if (!licenseData.is_active) {
+          throw new Error('License is deactivated');
+        }
+        
+        if (licenseData.device_fingerprint && licenseData.device_fingerprint !== deviceId) {
+          throw new Error('License is already in use on another device');
+        }
+        
+        // Update license with activation details
+        const { error: updateError } = await supabase
+          .from('licenses')
+          .update({
+            username: username,
+            device_fingerprint: deviceId,
+            ip_address: ipAddress,
+            screen_info: screenInfo,
+            user_agent: userAgent,
+            activated_at: new Date().toISOString(),
+            last_active: new Date().toISOString()
+          })
+          .eq('license_key', key.replace(/-/g, ''));
+          
+        if (updateError) {
+          throw new Error('Error activating license: ' + updateError.message);
+        }
+        
+        // Save license info to local storage
+        const licenseInfo = {
+          key: key.replace(/-/g, ''),
+          username: username,
+          activated_at: new Date().toISOString(),
+          device_id: deviceId
+        };
+        
+        localStorage.setItem('sypher_license', JSON.stringify(licenseInfo));
+        localStorage.setItem('sypher_certificate_verified', 'true');
+        
+        return {
+          success: true,
+          license: licenseInfo,
+          deviceId: deviceId
+        };
+      } catch (error) {
+        return {
+          success: false,
+          message: error.message
+        };
+      }
+    }
+    
+    // Handle activate button click
+    activateBtn.addEventListener('click', async function() {
+      const username = usernameInput.value.trim();
+      const key = licenseInput.value.replace(/-/g, '').toUpperCase();
+      
+      if (!username) {
+        showStatus('Please enter a username', 'error');
+        usernameInput.classList.add('error');
+        setTimeout(() => usernameInput.classList.remove('error'), 1000);
+        return;
+      }
+      
+      if (username.length > 10) {
+        showStatus('Username must be 10 characters or less', 'error');
+        usernameInput.classList.add('error');
+        setTimeout(() => usernameInput.classList.remove('error'), 1000);
+        return;
+      }
+      
+      if (!key || key.length !== 16) {
+        showStatus('Please enter a valid 16-character license key', 'error');
+        licenseInput.classList.add('error');
+        setTimeout(() => licenseInput.classList.remove('error'), 1000);
+        return;
+      }
+      
+      hideStatus();
+      activateBtn.disabled = true;
+      activateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Activating...';
+      
+      const result = await activateLicense(key, username);
+      
+      if (result.success) {
+        // Show success message
+        activationForm.style.display = 'none';
+        activatedSection.style.display = 'block';
+        
+        document.getElementById('activatedLicenseKey').textContent = formatLicenseKey(result.license.key);
+        document.getElementById('activatedUserName').textContent = result.license.username;
+        document.getElementById('activatedDeviceId').textContent = result.deviceId;
+        document.getElementById('activatedDate').textContent = new Date().toLocaleDateString();
+      } else {
+        showStatus(result.message, 'error');
+        licenseInput.classList.add('error');
+      }
+      
+      activateBtn.disabled = false;
+      activateBtn.innerHTML = '<i class="fas fa-certificate"></i> Activate License';
+    });
+    
+    // Continue to Sypher
+    continueBtn.addEventListener('click', function() {
+      // Set certificate verification flag
+      localStorage.setItem('sypher-certificate-verified', 'true');
+      window.location.href = 'index.html';
+    });
+    
+    // Initialize
+    checkExistingLicense();
+  })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,1640 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Sypher — Admin Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #ffc107;
+      --primary-dark: #ff8f00;
+      --primary-light: #fff8e1;
+      --secondary: #7b61ff;
+      --text: #0f1724;
+      --text-muted: #6b7280;
+      --success: #4caf50;
+      --success-light: #e8f5e9;
+      --danger: #f44336;
+      --danger-light: #ffebee;
+      --warning: #ff9800;
+      --info: #2196f3;
+      --bg: linear-gradient(180deg, #fbfbfd 0%, #f7f6fb 100%);
+      --card-bg: rgba(255, 255, 255, 0.90);
+      --card-border: rgba(2, 6, 23, 0.04);
+      --card-shadow: 0 18px 70px rgba(91, 33, 182, 0.06);
+      --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      --header-height: 70px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      transition: var(--transition);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* Auth overlay */
+    #authOverlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 20px;
+    }
+
+    .auth-container {
+      max-width: 500px;
+      width: 100%;
+    }
+
+    .auth-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(10px) saturate(120%);
+      -webkit-backdrop-filter: blur(10px) saturate(120%);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: var(--card-shadow);
+      text-align: center;
+    }
+
+    .auth-brand {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+
+    .auth-brand-logo {
+      width: 60px;
+      height: 60px;
+      border-radius: 12px;
+    }
+
+    .auth-brand-text {
+      text-align: left;
+    }
+
+    .auth-brand-title {
+      font-size: 2.2rem;
+      font-weight: 800;
+      background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      line-height: 1.1;
+      margin-bottom: 5px;
+    }
+
+    .auth-brand-subtitle {
+      font-size: 1rem;
+      color: var(--text-muted);
+    }
+
+    .auth-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: var(--text);
+    }
+
+    .auth-subtitle {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      margin-bottom: 30px;
+    }
+
+    .auth-input {
+      width: 100%;
+      padding: 16px 20px;
+      border-radius: 12px;
+      border: 1px solid var(--card-border);
+      background: rgba(255, 255, 255, 0.7);
+      font-size: 1.1rem;
+      font-weight: 600;
+      text-align: center;
+      transition: var(--transition);
+      margin: 20px 0;
+      box-shadow: 0 8px 20px rgba(12, 10, 22, 0.06);
+      letter-spacing: 3px;
+    }
+
+    .auth-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.3);
+      transform: translateY(-2px);
+    }
+
+    .auth-btn {
+      padding: 12px 24px;
+      border-radius: 12px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+      color: white;
+      box-shadow: 0 8px 20px rgba(255, 193, 7, 0.3);
+      width: 100%;
+      justify-content: center;
+    }
+
+    .auth-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 25px rgba(255, 193, 7, 0.4);
+    }
+
+    .auth-btn:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    /* Dashboard */
+    #dashboard {
+      display: none;
+    }
+
+    .dashboard-header {
+      background: var(--card-bg);
+      backdrop-filter: blur(10px) saturate(120%);
+      -webkit-backdrop-filter: blur(10px) saturate(120%);
+      border-bottom: 1px solid var(--card-border);
+      padding: 0 20px;
+      height: var(--header-height);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .dashboard-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .dashboard-brand-logo {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+    }
+
+    .dashboard-brand-text {
+      font-weight: 700;
+      font-size: 1.4rem;
+      background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .dashboard-nav {
+      display: flex;
+      gap: 20px;
+    }
+
+    .dashboard-nav-btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      transition: var(--transition);
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .dashboard-nav-btn:hover,
+    .dashboard-nav-btn.active {
+      background: rgba(255, 193, 7, 0.1);
+      color: var(--primary);
+    }
+
+    .dashboard-content {
+      padding: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .stat-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(10px) saturate(120%);
+      -webkit-backdrop-filter: blur(10px) saturate(120%);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: var(--card-shadow);
+      transition: var(--transition);
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 25px 80px rgba(91, 33, 182, 0.12);
+    }
+
+    .stat-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 15px;
+      font-size: 1.5rem;
+      background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+      color: white;
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 5px;
+      background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .stat-label {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .online-users {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+      padding: 10px;
+      background: var(--success-light);
+      border-radius: 8px;
+      border: 1px solid rgba(76, 175, 80, 0.2);
+    }
+
+    .online-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background-color: var(--success);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.5; }
+      100% { opacity: 1; }
+    }
+
+    .section-title {
+      font-size: 1.5rem;
+      margin: 30px 0 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .licenses-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--card-bg);
+      backdrop-filter: blur(10px) saturate(120%);
+      -webkit-backdrop-filter: blur(10px) saturate(120%);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: var(--card-shadow);
+    }
+
+    .licenses-table th,
+    .licenses-table td {
+      padding: 15px;
+      text-align: left;
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    .licenses-table th {
+      background: rgba(255, 193, 7, 0.1);
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    .licenses-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .licenses-table tr:hover {
+      background: rgba(255, 193, 7, 0.05);
+    }
+
+    .status-badge {
+      padding: 5px 10px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      display: inline-block;
+    }
+
+    .status-active {
+      background: var(--success-light);
+      color: var(--success);
+    }
+
+    .status-inactive {
+      background: var(--danger-light);
+      color: var(--danger);
+    }
+
+    .status-online {
+      background: rgba(76, 175, 80, 0.1);
+      color: var(--success);
+      border: 1px solid rgba(76, 175, 80, 0.2);
+    }
+
+    .action-btn {
+      padding: 6px 12px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      transition: var(--transition);
+      font-size: 0.9rem;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .btn-view {
+      background: rgba(33, 150, 243, 0.1);
+      color: var(--info);
+    }
+
+    .btn-view:hover {
+      background: rgba(33, 150, 243, 0.2);
+    }
+
+    .btn-deactivate {
+      background: rgba(244, 67, 54, 0.1);
+      color: var(--danger);
+    }
+
+    .btn-deactivate:hover {
+      background: rgba(244, 67, 54, 0.2);
+    }
+
+    .btn-activate {
+      background: rgba(76, 175, 80, 0.1);
+      color: var(--success);
+    }
+
+    .btn-activate:hover {
+      background: rgba(76, 175, 80, 0.2);
+    }
+
+    .btn-delete {
+      background: rgba(244, 67, 54, 0.1);
+      color: var(--danger);
+    }
+
+    .btn-delete:hover {
+      background: rgba(244, 67, 54, 0.2);
+    }
+
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(5px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modal {
+      background: var(--card-bg);
+      backdrop-filter: blur(10px) saturate(120%);
+      -webkit-backdrop-filter: blur(10px) saturate(120%);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 30px;
+      box-shadow: var(--card-shadow);
+      max-width: 500px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      transform: translateY(20px);
+      transition: transform 0.3s ease;
+    }
+
+    .modal-overlay.active .modal {
+      transform: translateY(0);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    .modal-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: var(--transition);
+    }
+
+    .modal-close:hover {
+      color: var(--primary);
+    }
+
+    .modal-body {
+      margin-bottom: 20px;
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    .modal-btn {
+      padding: 10px 20px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      transition: var(--transition);
+      font-weight: 500;
+    }
+
+    .modal-btn-primary {
+      background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+      color: white;
+    }
+
+    .modal-btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(255, 193, 7, 0.3);
+    }
+
+    .modal-btn-secondary {
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--card-border);
+    }
+
+    .modal-btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .license-detail {
+      margin-bottom: 15px;
+    }
+
+    .license-detail label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 5px;
+      color: var(--text);
+    }
+
+    .license-detail span {
+      display: block;
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      border: 1px solid var(--card-border);
+    }
+
+    .generate-license {
+      background: var(--card-bg);
+      backdrop-filter: blur(10px) saturate(120%);
+      -webkit-backdrop-filter: blur(10px) saturate(120%);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: var(--card-shadow);
+      margin-bottom: 30px;
+    }
+
+    .generate-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 15px;
+    }
+
+    .generate-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .generate-form {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: 10px;
+    }
+
+    .generate-input {
+      padding: 12px 16px;
+      border-radius: 8px;
+      border: 1px solid var(--card-border);
+      background: rgba(255, 255, 255, 0.7);
+    }
+
+    .generate-btn {
+      padding: 12px 20px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+      color: white;
+      font-weight: 500;
+      transition: var(--transition);
+    }
+
+    .generate-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(255, 193, 7, 0.3);
+    }
+
+    .new-license-result {
+      margin-top: 15px;
+      padding: 15px;
+      border-radius: 8px;
+      background: rgba(76, 175, 80, 0.1);
+      border: 1px solid rgba(76, 175, 80, 0.2);
+      display: none;
+    }
+
+    .new-license-key {
+      font-family: monospace;
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin: 10px 0;
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 6px;
+      text-align: center;
+      letter-spacing: 1px;
+    }
+
+    .copy-btn {
+      padding: 8px 16px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      background: rgba(33, 150, 243, 0.1);
+      color: var(--info);
+      font-weight: 500;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .copy-btn:hover {
+      background: rgba(33, 150, 243, 0.2);
+    }
+
+    .analytics-chart {
+      background: var(--card-bg);
+      backdrop-filter: blur(10px) saturate(120%);
+      -webkit-backdrop-filter: blur(10px) saturate(120%);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: var(--card-shadow);
+      margin-bottom: 30px;
+      height: 300px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .chart-placeholder {
+      text-align: center;
+      color: var(--text-muted);
+    }
+
+    .chart-placeholder i {
+      font-size: 3rem;
+      margin-bottom: 15px;
+      color: var(--primary);
+    }
+
+    @media (max-width: 768px) {
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .licenses-table {
+        display: block;
+        overflow-x: auto;
+      }
+      
+      .generate-form {
+        grid-template-columns: 1fr;
+      }
+      
+      .dashboard-nav {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Authentication Overlay -->
+  <div id="authOverlay">
+    <div class="auth-container">
+      <div class="auth-card">
+        <div class="auth-brand">
+          <img class="auth-brand-logo" src="https://static.wixstatic.com/media/a3a3cf_7fe0f60fa9d94a88ac2beaa6a9c41e6f~mv2.png" alt="Sypher logo">
+          <div class="auth-brand-text">
+            <div class="auth-brand-title">Sypher</div>
+            <div class="auth-brand-subtitle">Admin Dashboard</div>
+          </div>
+        </div>
+
+        <h1 class="auth-title">Admin Authentication</h1>
+        <p class="auth-subtitle">Enter the admin password to access the dashboard</p>
+
+        <input type="password" id="adminPassword" class="auth-input" placeholder="Enter admin code" maxlength="4">
+        
+        <button id="adminLoginBtn" class="auth-btn">
+          <i class="fas fa-lock-open"></i> Access Dashboard
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dashboard Content -->
+  <div id="dashboard">
+    <header class="dashboard-header">
+      <div class="dashboard-brand">
+        <img class="dashboard-brand-logo" src="https://static.wixstatic.com/media/a3a3cf_7fe0f60fa9d94a88ac2beaa6a9c41e6f~mv2.png" alt="Sypher logo">
+        <div class="dashboard-brand-text">Sypher Admin</div>
+      </div>
+      
+      <nav class="dashboard-nav">
+        <button class="dashboard-nav-btn active" data-section="overview">
+          <i class="fas fa-chart-pie"></i> Overview
+        </button>
+        <button class="dashboard-nav-btn" data-section="licenses">
+          <i class="fas fa-certificate"></i> Licenses
+        </button>
+        <button class="dashboard-nav-btn" data-section="analytics">
+          <i class="fas fa-chart-line"></i> Analytics
+        </button>
+        <button class="dashboard-nav-btn" data-section="settings">
+          <i class="fas fa-cog"></i> Settings
+        </button>
+        <button id="logoutBtn" class="dashboard-nav-btn">
+          <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
+      </nav>
+    </header>
+
+    <main class="dashboard-content">
+      <!-- Overview Section -->
+      <div id="overviewSection" class="dashboard-section">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon">
+              <i class="fas fa-certificate"></i>
+            </div>
+            <div class="stat-value" id="totalLicenses">0</div>
+            <div class="stat-label">Total Licenses</div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-icon">
+              <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="stat-value" id="activeLicenses">0</div>
+            <div class="stat-label">Active Licenses</div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-icon">
+              <i class="fas fa-times-circle"></i>
+            </div>
+            <div class="stat-value" id="inactiveLicenses">0</div>
+            <div class="stat-label">Inactive Licenses</div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-icon">
+              <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-value" id="onlineUsers">0</div>
+            <div class="stat-label">Online Users</div>
+            <div class="online-users">
+              <div class="online-dot"></div>
+              <span>Real-time tracking active</span>
+            </div>
+          </div>
+        </div>
+        
+        <h2 class="section-title">
+          <i class="fas fa-history"></i> Recent Activity
+        </h2>
+        
+        <div class="recent-activity">
+          <table class="licenses-table">
+            <thead>
+              <tr>
+                <th>License Key</th>
+                <th>Username</th>
+                <th>Last Active</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="recentActivityBody">
+              <!-- Will be populated by JavaScript -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      <!-- Licenses Section -->
+      <div id="licensesSection" class="dashboard-section" style="display: none;">
+        <div class="generate-license">
+          <div class="generate-header">
+            <div class="generate-title">
+              <i class="fas fa-plus-circle"></i> Generate New License
+            </div>
+          </div>
+          
+          <div class="generate-form">
+            <input type="text" id="userName" class="generate-input" placeholder="Full Name" required>
+            <input type="text" id="userUsername" class="generate-input" placeholder="Username (max 10 chars)" maxlength="10">
+            <button id="generateLicenseBtn" class="generate-btn">
+              <i class="fas fa-magic"></i> Generate
+            </button>
+          </div>
+          
+          <div id="newLicenseResult" class="new-license-result">
+            <p><strong>License generated successfully!</strong></p>
+            <div class="new-license-key" id="newLicenseKey">XXXX-XXXX-XXXX-XXXX</div>
+            <button class="copy-btn" id="copyLicenseBtn">
+              <i class="fas fa-copy"></i> Copy to Clipboard
+            </button>
+          </div>
+        </div>
+        
+        <h2 class="section-title">
+          <i class="fas fa-list"></i> All Licenses
+        </h2>
+        
+        <div class="licenses-list">
+          <table class="licenses-table">
+            <thead>
+              <tr>
+                <th>License Key</th>
+                <th>Full Name</th>
+                <th>Username</th>
+                <th>Activation Date</th>
+                <th>Last Active</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="licensesTableBody">
+              <!-- Will be populated by JavaScript -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Analytics Section -->
+      <div id="analyticsSection" class="dashboard-section" style="display: none;">
+        <h2 class="section-title">
+          <i class="fas fa-chart-line"></i> Usage Analytics
+        </h2>
+        
+        <div class="analytics-chart">
+          <div class="chart-placeholder">
+            <i class="fas fa-chart-bar"></i>
+            <p>Usage analytics will be displayed here</p>
+            <p><small>Daily and weekly usage statistics</small></p>
+          </div>
+        </div>
+        
+        <h2 class="section-title">
+          <i class="fas fa-desktop"></i> Device Information
+        </h2>
+        
+        <div class="licenses-list">
+          <table class="licenses-table">
+            <thead>
+              <tr>
+                <th>Username</th>
+                <th>IP Address</th>
+                <th>Screen Resolution</th>
+                <th>User Agent</th>
+                <th>Last Active</th>
+              </tr>
+            </thead>
+            <tbody id="deviceInfoBody">
+              <!-- Will be populated by JavaScript -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      <!-- Settings Section -->
+      <div id="settingsSection" class="dashboard-section" style="display: none;">
+        <h2 class="section-title">
+          <i class="fas fa-cog"></i> System Settings
+        </h2>
+        
+        <div class="stat-card">
+          <h3>Database Management</h3>
+          <p>Manage your license database and perform maintenance operations.</p>
+          
+          <div style="display: flex; gap: 10px; margin-top: 15px;">
+            <button id="exportBtn" class="action-btn btn-view">
+              <i class="fas fa-download"></i> Export Data
+            </button>
+            <button id="importBtn" class="action-btn btn-view">
+              <i class="fas fa-upload"></i> Import Data
+            </button>
+            <button id="clearBtn" class="action-btn btn-delete">
+              <i class="fas fa-trash"></i> Clear All Data
+            </button>
+          </div>
+        </div>
+        
+        <div class="stat-card" style="margin-top: 20px;">
+          <h3>Password Settings</h3>
+          <p>Change your admin dashboard password.</p>
+          
+          <div style="margin-top: 15px;">
+            <input type="password" id="newAdminPassword" class="generate-input" placeholder="New admin password" style="width: 100%; margin-bottom: 10px;">
+            <button id="changePasswordBtn" class="generate-btn">
+              <i class="fas fa-key"></i> Change Password
+            </button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- License Detail Modal -->
+  <div class="modal-overlay" id="licenseModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">License Details</h3>
+        <button class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="license-detail">
+          <label>License Key</label>
+          <span id="modalLicenseKey">XXXX-XXXX-XXXX-XXXX</span>
+        </div>
+        <div class="license-detail">
+          <label>Full Name</label>
+          <span id="modalUserName">Unknown</span>
+        </div>
+        <div class="license-detail">
+          <label>Username</label>
+          <span id="modalUserUsername">Unknown</span>
+        </div>
+        <div class="license-detail">
+          <label>Device ID</label>
+          <span id="modalDeviceId">Unknown</span>
+        </div>
+        <div class="license-detail">
+          <label>IP Address</label>
+          <span id="modalIpAddress">Unknown</span>
+        </div>
+        <div class="license-detail">
+          <label>Screen Info</label>
+          <span id="modalScreenInfo">Unknown</span>
+        </div>
+        <div class="license-detail">
+          <label>Activation Date</label>
+          <span id="modalActivationDate">Not activated</span>
+        </div>
+        <div class="license-detail">
+          <label>Last Active</label>
+          <span id="modalLastActive">Never</span>
+        </div>
+        <div class="license-detail">
+          <label>Status</label>
+          <span id="modalStatus">Inactive</span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-btn modal-btn-secondary" id="modalCloseBtn">Close</button>
+        <button class="modal-btn modal-btn-primary" id="modalToggleStatusBtn">Activate</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirmation Modal -->
+  <div class="modal-overlay" id="confirmModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">Confirm Action</h3>
+        <button class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p id="confirmMessage">Are you sure you want to perform this action?</p>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-btn modal-btn-secondary" id="confirmCancelBtn">Cancel</button>
+        <button class="modal-btn modal-btn-primary" id="confirmActionBtn">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Load Supabase client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+  // Supabase configuration
+  const SUPABASE_URL = 'https://nmhrxkekmimvxvadeera.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhbmFzZSIsInJlZiI6Im5taHJ4a2VrbWltdnh2YWRlZXJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc5NTQ0MzIsImV4cCI6MjA3MzUzMDQzMn0.KMjmo94xtRzN7XZ7j-cbkeOyFDjviX2xouPUwiAwaRo';
+  
+  // Initialize Supabase client
+  const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  
+  (function(){
+    // DOM Elements
+    const authOverlay = document.getElementById('authOverlay');
+    const dashboard = document.getElementById('dashboard');
+    const adminPassword = document.getElementById('adminPassword');
+    const adminLoginBtn = document.getElementById('adminLoginBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const navButtons = document.querySelectorAll('.dashboard-nav-btn');
+    const sections = document.querySelectorAll('.dashboard-section');
+    
+    // Admin password - Now using Supabase authentication
+    const checkAdminPassword = async (password) => {
+      try {
+        // First, check if we have an admin user with this password
+        const { data, error } = await supabase
+          .from('admin_users')
+          .select('*')
+          .eq('password_hash', password) // In a real app, you should hash passwords!
+          .single();
+          
+        if (error) {
+          console.error('Authentication error:', error);
+          return false;
+        }
+        
+        return !!data;
+      } catch (error) {
+        console.error('Authentication error:', error);
+        return false;
+      }
+    };
+    
+    // Check if already authenticated
+    if (localStorage.getItem('sypher-admin-authenticated') === 'true') {
+      authOverlay.style.display = 'none';
+      dashboard.style.display = 'block';
+      loadDashboardData();
+    }
+    
+    // Admin login
+    adminLoginBtn.addEventListener('click', async function() {
+      const password = adminPassword.value;
+      
+      if (await checkAdminPassword(password)) {
+        localStorage.setItem('sypher-admin-authenticated', 'true');
+        authOverlay.style.display = 'none';
+        dashboard.style.display = 'block';
+        loadDashboardData();
+      } else {
+        alert('Invalid admin password. Please try again with the correct password.');
+        adminPassword.value = '';
+      }
+    });
+    
+    // Allow Enter key to submit
+    adminPassword.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        adminLoginBtn.click();
+      }
+    });
+    
+    // Logout
+    logoutBtn.addEventListener('click', function() {
+      localStorage.removeItem('sypher-admin-authenticated');
+      authOverlay.style.display = 'flex';
+      dashboard.style.display = 'none';
+      adminPassword.value = '';
+    });
+    
+    // Navigation
+    navButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        if (this.id === 'logoutBtn') return;
+        
+        // Update active button
+        navButtons.forEach(btn => btn.classList.remove('active'));
+        this.classList.add('active');
+        
+        // Show corresponding section
+        const sectionId = this.getAttribute('data-section') + 'Section';
+        sections.forEach(section => section.style.display = 'none');
+        document.getElementById(sectionId).style.display = 'block';
+      });
+    });
+    
+    // Load dashboard data
+    function loadDashboardData() {
+      loadLicenses();
+      loadOnlineUsers();
+      loadDeviceInfo();
+    }
+    
+    // Load all licenses
+    async function loadLicenses() {
+      try {
+        const { data: licenses, error } = await supabase
+          .from('licenses')
+          .select('*')
+          .order('created_at', { ascending: false });
+          
+        if (error) {
+          console.error('Error loading licenses:', error);
+          return;
+        }
+        
+        // Update stats
+        const total = licenses.length;
+        const active = licenses.filter(l => l.is_active).length;
+        const inactive = total - active;
+        
+        document.getElementById('totalLicenses').textContent = total;
+        document.getElementById('activeLicenses').textContent = active;
+        document.getElementById('inactiveLicenses').textContent = inactive;
+        
+        // Update licenses table
+        const tableBody = document.getElementById('licensesTableBody');
+        tableBody.innerHTML = '';
+        
+        licenses.forEach(license => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${formatLicenseKey(license.license_key)}</td>
+            <td>${license.user_name || 'N/A'}</td>
+            <td>${license.username || 'N/A'}</td>
+            <td>${license.activated_at ? new Date(license.activated_at).toLocaleDateString() : 'N/A'}</td>
+            <td>${license.last_active ? new Date(license.last_active).toLocaleDateString() : 'N/A'}</td>
+            <td><span class="status-badge ${license.is_active ? 'status-active' : 'status-inactive'}">${license.is_active ? 'Active' : 'Inactive'}</span></td>
+            <td>
+              <button class="action-btn btn-view" data-key="${license.license_key}">
+                <i class="fas fa-eye"></i> View
+              </button>
+              <button class="action-btn ${license.is_active ? 'btn-deactivate' : 'btn-activate'}" data-key="${license.license_key}">
+                <i class="fas ${license.is_active ? 'fa-times-circle' : 'fa-check-circle'}"></i> ${license.is_active ? 'Deactivate' : 'Activate'}
+              </button>
+              <button class="action-btn btn-delete" data-key="${license.license_key}">
+                <i class="fas fa-trash"></i> Delete
+              </button>
+            </td>
+          `;
+          tableBody.appendChild(row);
+        });
+        
+        // Update recent activity (last 5 licenses)
+        const recentActivityBody = document.getElementById('recentActivityBody');
+        recentActivityBody.innerHTML = '';
+        
+        const recentLicenses = licenses.slice(0, 5);
+        
+        recentLicenses.forEach(license => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${formatLicenseKey(license.license_key)}</td>
+            <td>${license.username || 'N/A'}</td>
+            <td>${license.last_active ? new Date(license.last_active).toLocaleDateString() : 'N/A'}</td>
+            <td><span class="status-badge ${license.is_active ? 'status-active' : 'status-inactive'}">${license.is_active ? 'Active' : 'Inactive'}</span></td>
+            <td>
+              <button class="action-btn btn-view" data-key="${license.license_key}">
+                <i class="fas fa-eye"></i> View
+              </button>
+            </td>
+          `;
+          recentActivityBody.appendChild(row);
+        });
+        
+        // Add event listeners to action buttons
+        document.querySelectorAll('.btn-view').forEach(btn => {
+          btn.addEventListener('click', () => viewLicense(btn.getAttribute('data-key')));
+        });
+        
+        document.querySelectorAll('.btn-deactivate, .btn-activate').forEach(btn => {
+          btn.addEventListener('click', () => toggleLicenseStatus(btn.getAttribute('data-key')));
+        });
+        
+        document.querySelectorAll('.btn-delete').forEach(btn => {
+          btn.addEventListener('click', () => deleteLicense(btn.getAttribute('data-key')));
+        });
+        
+      } catch (error) {
+        console.error('Error loading licenses:', error);
+      }
+    }
+    
+    // Load online users
+    async function loadOnlineUsers() {
+      try {
+        // Consider users online if they were active in the last 5 minutes
+        const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+        
+        const { data: onlineUsers, error } = await supabase
+          .from('licenses')
+          .select('*')
+          .gt('last_active', fiveMinutesAgo)
+          .eq('is_active', true);
+          
+        if (error) {
+          console.error('Error loading online users:', error);
+          return;
+        }
+        
+        document.getElementById('onlineUsers').textContent = onlineUsers.length;
+        
+      } catch (error) {
+        console.error('Error loading online users:', error);
+      }
+    }
+    
+    // Load device information
+    async function loadDeviceInfo() {
+      try {
+        const { data: licenses, error } = await supabase
+          .from('licenses')
+          .select('username, ip_address, screen_info, user_agent, last_active')
+          .order('last_active', { ascending: false });
+          
+        if (error) {
+          console.error('Error loading device info:', error);
+          return;
+        }
+        
+        const deviceInfoBody = document.getElementById('deviceInfoBody');
+        deviceInfoBody.innerHTML = '';
+        
+        licenses.forEach(license => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${license.username || 'N/A'}</td>
+            <td>${license.ip_address || 'N/A'}</td>
+            <td>${license.screen_info || 'N/A'}</td>
+            <td>${license.user_agent ? license.user_agent.substring(0, 50) + '...' : 'N/A'}</td>
+            <td>${license.last_active ? new Date(license.last_active).toLocaleDateString() : 'N/A'}</td>
+          `;
+          deviceInfoBody.appendChild(row);
+        });
+        
+      } catch (error) {
+        console.error('Error loading device info:', error);
+      }
+    }
+    
+    // Format license key for display
+    function formatLicenseKey(key) {
+      if (!key) return 'N/A';
+      return key.replace(/(.{4})/g, '$1-').slice(0, 19);
+    }
+    
+    // Generate a license key
+    function generateLicenseKey() {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      let key = '';
+      
+      for (let i = 0; i < 16; i++) {
+        key += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      
+      return key;
+    }
+    
+    // View license details
+    async function viewLicense(key) {
+      try {
+        const { data: license, error } = await supabase
+          .from('licenses')
+          .select('*')
+          .eq('license_key', key)
+          .single();
+          
+        if (error) {
+          alert('License not found');
+          return;
+        }
+        
+        document.getElementById('modalLicenseKey').textContent = formatLicenseKey(license.license_key);
+        document.getElementById('modalUserName').textContent = license.user_name || 'N/A';
+        document.getElementById('modalUserUsername').textContent = license.username || 'N/A';
+        document.getElementById('modalDeviceId').textContent = license.device_fingerprint || 'Not activated';
+        document.getElementById('modalIpAddress').textContent = license.ip_address || 'N/A';
+        document.getElementById('modalScreenInfo').textContent = license.screen_info || 'N/A';
+        document.getElementById('modalActivationDate').textContent = license.activated_at ? new Date(license.activated_at).toLocaleDateString() : 'Not activated';
+        document.getElementById('modalLastActive').textContent = license.last_active ? new Date(license.last_active).toLocaleDateString() : 'Never';
+        document.getElementById('modalStatus').textContent = license.is_active ? 'Active' : 'Inactive';
+        
+        // Update toggle button text
+        const toggleBtn = document.getElementById('modalToggleStatusBtn');
+        toggleBtn.textContent = license.is_active ? 'Deactivate' : 'Activate';
+        toggleBtn.setAttribute('data-key', key);
+        
+        // Show modal
+        document.getElementById('licenseModal').classList.add('active');
+      } catch (error) {
+        console.error('Error viewing license:', error);
+        alert('Error loading license details');
+      }
+    }
+    
+    // Toggle license status
+    async function toggleLicenseStatus(key) {
+      try {
+        const { data: license, error } = await supabase
+          .from('licenses')
+          .select('*')
+          .eq('license_key', key)
+          .single();
+          
+        if (error) {
+          alert('License not found');
+          return;
+        }
+        
+        const newStatus = !license.is_active;
+        const action = newStatus ? 'activate' : 'deactivate';
+        
+        showConfirm(
+          `Are you sure you want to ${action} license ${formatLicenseKey(key)}?`,
+          async () => {
+            try {
+              const { error: updateError } = await supabase
+                .from('licenses')
+                .update({ is_active: newStatus })
+                .eq('license_key', key);
+                
+              if (updateError) {
+                throw new Error(updateError.message);
+              }
+              
+              loadDashboardData();
+              hideConfirm();
+            } catch (error) {
+              console.error('Error updating license status:', error);
+              alert('Error updating license status');
+            }
+          }
+        );
+      } catch (error) {
+        console.error('Error toggling license status:', error);
+        alert('Error loading license details');
+      }
+    }
+    
+    // Delete license
+    async function deleteLicense(key) {
+      showConfirm(
+        `Are you sure you want to delete license ${formatLicenseKey(key)}? This action cannot be undone.`,
+        async () => {
+          try {
+            const { error } = await supabase
+              .from('licenses')
+              .delete()
+              .eq('license_key', key);
+              
+            if (error) {
+              throw new Error(error.message);
+            }
+            
+            loadDashboardData();
+            hideConfirm();
+          } catch (error) {
+            console.error('Error deleting license:', error);
+            alert('Error deleting license');
+          }
+        }
+      );
+    }
+    
+    // Generate new license
+    document.getElementById('generateLicenseBtn').addEventListener('click', async function() {
+      const userName = document.getElementById('userName').value.trim();
+      const userUsername = document.getElementById('userUsername').value.trim();
+      
+      if (!userName) {
+        alert('Please enter a full name');
+        return;
+      }
+      
+      if (!userUsername) {
+        alert('Please enter a username');
+        return;
+      }
+      
+      if (userUsername.length > 10) {
+        alert('Username must be 10 characters or less');
+        return;
+      }
+      
+      const licenseKey = generateLicenseKey();
+      
+      try {
+        const { error } = await supabase
+          .from('licenses')
+          .insert([
+            {
+              license_key: licenseKey,
+              user_name: userName,
+              username: userUsername,
+              is_active: true,
+              created_at: new Date().toISOString()
+            }
+          ]);
+          
+        if (error) {
+          throw new Error(error.message);
+        }
+        
+        // Show result
+        const resultDiv = document.getElementById('newLicenseResult');
+        const licenseKeyDiv = document.getElementById('newLicenseKey');
+        
+        licenseKeyDiv.textContent = formatLicenseKey(licenseKey);
+        resultDiv.style.display = 'block';
+        
+        // Clear form
+        document.getElementById('userName').value = '';
+        document.getElementById('userUsername').value = '';
+        
+        // Reload licenses
+        loadLicenses();
+        
+        // Copy to clipboard
+        document.getElementById('copyLicenseBtn').addEventListener('click', function() {
+          navigator.clipboard.writeText(licenseKey)
+            .then(() => {
+              alert('License key copied to clipboard');
+            })
+            .catch(() => {
+              // Fallback for older browsers
+              const textArea = document.createElement('textarea');
+              textArea.value = licenseKey;
+              document.body.appendChild(textArea);
+              textArea.select();
+              document.execCommand('copy');
+              document.body.removeChild(textArea);
+              alert('License key copied to clipboard');
+            });
+        });
+      } catch (error) {
+        console.error('Error creating license:', error);
+        alert('Error creating license: ' + error.message);
+      }
+    });
+    
+    // Change admin password
+    document.getElementById('changePasswordBtn').addEventListener('click', async function() {
+      const newPassword = document.getElementById('newAdminPassword').value;
+      
+      if (!newPassword || newPassword.length !== 4) {
+        alert('Password must be 4 digits');
+        return;
+      }
+      
+      try {
+        // In a real app, you should hash the password before storing it
+        const { error } = await supabase
+          .from('admin_users')
+          .update({ password_hash: newPassword })
+          .eq('id', 1); // Assuming there's only one admin user with ID 1
+          
+        if (error) {
+          throw new Error(error.message);
+        }
+        
+        alert('Admin password updated successfully');
+        document.getElementById('newAdminPassword').value = '';
+      } catch (error) {
+        console.error('Error changing password:', error);
+        alert('Error changing password: ' + error.message);
+      }
+    });
+    
+    // Modal functionality
+    document.querySelectorAll('.modal-close, #modalCloseBtn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.modal-overlay').forEach(modal => {
+          modal.classList.remove('active');
+        });
+      });
+    });
+    
+    document.getElementById('modalToggleStatusBtn').addEventListener('click', function() {
+      const key = this.getAttribute('data-key');
+      toggleLicenseStatus(key);
+      document.getElementById('licenseModal').classList.remove('active');
+    });
+    
+    // Confirmation modal functions
+    function showConfirm(message, callback) {
+      document.getElementById('confirmMessage').textContent = message;
+      document.getElementById('confirmModal').classList.add('active');
+      
+      const confirmBtn = document.getElementById('confirmActionBtn');
+      // Remove any existing event listeners
+      const newConfirmBtn = confirmBtn.cloneNode(true);
+      confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+      
+      newConfirmBtn.addEventListener('click', callback);
+    }
+    
+    function hideConfirm() {
+      document.getElementById('confirmModal').classList.remove('active');
+    }
+    
+    document.getElementById('confirmCancelBtn').addEventListener('click', hideConfirm);
+    
+    // Database management
+    document.getElementById('exportBtn').addEventListener('click', async function() {
+      try {
+        const { data: licenses, error } = await supabase
+          .from('licenses')
+          .select('*');
+          
+        if (error) {
+          throw new Error(error.message);
+        }
+        
+        const dataStr = JSON.stringify(licenses, null, 2);
+        const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+        
+        const exportFileDefaultName = 'sypher-licenses.json';
+        
+        const linkElement = document.createElement('a');
+        linkElement.setAttribute('href', dataUri);
+        linkElement.setAttribute('download', exportFileDefaultName);
+        linkElement.click();
+      } catch (error) {
+        console.error('Error exporting data:', error);
+        alert('Error exporting data');
+      }
+    });
+    
+    document.getElementById('importBtn').addEventListener('click', function() {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.json';
+      
+      input.addEventListener('change', function() {
+        const file = this.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          try {
+            const data = JSON.parse(e.target.result);
+            showConfirm(
+              'This will replace all current license data. Are you sure?',
+              async () => {
+                try {
+                  // First delete all existing licenses
+                  const { error: deleteError } = await supabase
+                    .from('licenses')
+                    .delete()
+                    .neq('license_key', '');
+                    
+                  if (deleteError) {
+                    throw new Error(deleteError.message);
+                  }
+                  
+                  // Insert new licenses
+                  const { error: insertError } = await supabase
+                    .from('licenses')
+                    .insert(data);
+                    
+                  if (insertError) {
+                    throw new Error(insertError.message);
+                  }
+                  
+                  alert('Data imported successfully');
+                  loadDashboardData();
+                  hideConfirm();
+                } catch (error) {
+                  console.error('Error importing data:', error);
+                  alert('Error importing data');
+                }
+              }
+            );
+          } catch (error) {
+            console.error('Error parsing JSON:', error);
+            alert('Invalid JSON file');
+          }
+        };
+        reader.readAsText(file);
+      });
+      
+      input.click();
+    });
+    
+    document.getElementById('clearBtn').addEventListener('click', function() {
+      showConfirm(
+        'This will permanently delete all license data. Are you sure?',
+        async () => {
+          try {
+            const { error } = await supabase
+              .from('licenses')
+              .delete()
+              .neq('license_key', '');
+              
+            if (error) {
+              throw new Error(error.message);
+            }
+            
+            alert('All data cleared successfully');
+            loadDashboardData();
+            hideConfirm();
+          } catch (error) {
+            console.error('Error clearing data:', error);
+            alert('Error clearing data');
+          }
+        }
+      );
+    });
+    
+    // Initialize the dashboard
+    if (dashboard.style.display === 'block') {
+      loadDashboardData();
+      
+      // Refresh data every 30 seconds
+      setInterval(() => {
+        loadLicenses();
+        loadOnlineUsers();
+      }, 30000);
+    }
+  })();
+  </script>
+</body>
+</html>
