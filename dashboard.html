@@ -7,10 +7,11 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     :root {
-      --primary: #ffc107;
-      --primary-dark: #ff8f00;
-      --primary-light: #fff8e1;
-      --secondary: #7b61ff;
+      --primary: #7b61ff;
+      --primary-dark: #5f3dc6;
+      --primary-light: #f5f2ff;
+      --secondary: #ffc107;
+      --secondary-dark: #ff8f00;
       --text: #0f1724;
       --text-muted: #6b7280;
       --success: #4caf50;
@@ -126,24 +127,21 @@
       border-radius: 12px;
       border: 1px solid var(--card-border);
       background: rgba(255, 255, 255, 0.7);
-      font-size: 1.1rem;
-      font-weight: 600;
-      text-align: center;
+      font-size: 1rem;
       transition: var(--transition);
-      margin: 20px 0;
+      margin: 10px 0;
       box-shadow: 0 8px 20px rgba(12, 10, 22, 0.06);
-      letter-spacing: 3px;
     }
 
     .auth-input:focus {
       outline: none;
       border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.3);
+      box-shadow: 0 0 0 3px rgba(123, 97, 255, 0.3);
       transform: translateY(-2px);
     }
 
     .auth-btn {
-      padding: 12px 24px;
+      padding: 16px 32px;
       border-radius: 12px;
       border: none;
       font-weight: 600;
@@ -154,20 +152,32 @@
       gap: 8px;
       background: linear-gradient(90deg, var(--primary), var(--primary-dark));
       color: white;
-      box-shadow: 0 8px 20px rgba(255, 193, 7, 0.3);
+      box-shadow: 0 8px 20px rgba(91, 33, 182, 0.2);
       width: 100%;
       justify-content: center;
+      margin-top: 10px;
     }
 
     .auth-btn:hover {
       transform: translateY(-2px);
-      box-shadow: 0 12px 25px rgba(255, 193, 7, 0.4);
+      box-shadow: 0 12px 25px rgba(91, 33, 182, 0.3);
     }
 
     .auth-btn:disabled {
       opacity: 0.7;
       cursor: not-allowed;
       transform: none !important;
+    }
+
+    .status-message {
+      padding: 12px 16px;
+      border-radius: 10px;
+      margin: 15px 0;
+      font-weight: 500;
+      display: none;
+      background: rgba(255, 152, 0, 0.15);
+      color: #f57c00;
+      border: 1px solid rgba(255, 152, 0, 0.3);
     }
 
     /* Dashboard */
@@ -229,7 +239,7 @@
 
     .dashboard-nav-btn:hover,
     .dashboard-nav-btn.active {
-      background: rgba(255, 193, 7, 0.1);
+      background: rgba(123, 97, 255, 0.1);
       color: var(--primary);
     }
 
@@ -345,7 +355,7 @@
     }
 
     .licenses-table th {
-      background: rgba(255, 193, 7, 0.1);
+      background: rgba(123, 97, 255, 0.1);
       font-weight: 600;
       color: var(--primary);
     }
@@ -355,7 +365,7 @@
     }
 
     .licenses-table tr:hover {
-      background: rgba(255, 193, 7, 0.05);
+      background: rgba(123, 97, 255, 0.05);
     }
 
     .status-badge {
@@ -528,7 +538,7 @@
 
     .modal-btn-primary:hover {
       transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(255, 193, 7, 0.3);
+      box-shadow: 0 5px 15px rgba(123, 97, 255, 0.3);
     }
 
     .modal-btn-secondary {
@@ -610,7 +620,7 @@
 
     .generate-btn:hover {
       transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(255, 193, 7, 0.3);
+      box-shadow: 0 5px 15px rgba(123, 97, 255, 0.3);
     }
 
     .new-license-result {
@@ -712,12 +722,15 @@
         </div>
 
         <h1 class="auth-title">Admin Authentication</h1>
-        <p class="auth-subtitle">Enter the admin password to access the dashboard</p>
+        <p class="auth-subtitle">Enter admin credentials to access the dashboard</p>
 
-        <input type="password" id="adminPassword" class="auth-input" placeholder="Enter admin code" maxlength="4">
+        <input type="text" id="adminUsername" class="auth-input" placeholder="Username">
+        <input type="password" id="adminPassword" class="auth-input" placeholder="Password">
+        
+        <div id="authMessage" class="status-message"></div>
         
         <button id="adminLoginBtn" class="auth-btn">
-          <i class="fas fa-lock-open"></i> Access Dashboard
+          <i class="fas fa-lock-open"></i> Login
         </button>
       </div>
     </div>
@@ -1011,7 +1024,7 @@
   <script>
   // Supabase configuration
   const SUPABASE_URL = 'https://nmhrxkekmimvxvadeera.supabase.co';
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhbmFzZSIsInJlZiI6Im5taHJ4a2VrbWltdnh2YWRlZXJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc5NTQ0MzIsImV4cCI6MjA3MzUzMDQzMn0.KMjmo94xtRzN7XZ7j-cbkeOyFDjviX2xouPUwiAwaRo';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5taHJ4a2VrbWltdnh2YWRlZXJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc5NTQ0MzIsImV4cCI6MjA3MzUzMDQzMn0.KMjmo94xtRzN7XZ7j-cbkeOyFDjviX2xouPUwiAwaRo';
   
   // Initialize Supabase client
   const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -1020,57 +1033,90 @@
     // DOM Elements
     const authOverlay = document.getElementById('authOverlay');
     const dashboard = document.getElementById('dashboard');
+    const adminUsername = document.getElementById('adminUsername');
     const adminPassword = document.getElementById('adminPassword');
     const adminLoginBtn = document.getElementById('adminLoginBtn');
+    const authMessage = document.getElementById('authMessage');
     const logoutBtn = document.getElementById('logoutBtn');
     const navButtons = document.querySelectorAll('.dashboard-nav-btn');
     const sections = document.querySelectorAll('.dashboard-section');
     
-    // Admin password - Now using Supabase authentication
-    const checkAdminPassword = async (password) => {
-      try {
-        // First, check if we have an admin user with this password
-        const { data, error } = await supabase
-          .from('admin_users')
-          .select('*')
-          .eq('password_hash', password) // In a real app, you should hash passwords!
-          .single();
-          
-        if (error) {
-          console.error('Authentication error:', error);
-          return false;
-        }
-        
-        return !!data;
-      } catch (error) {
-        console.error('Authentication error:', error);
-        return false;
-      }
-    };
-    
     // Check if already authenticated
-    if (localStorage.getItem('sypher-admin-authenticated') === 'true') {
-      authOverlay.style.display = 'none';
-      dashboard.style.display = 'block';
-      loadDashboardData();
+    const sessionToken = localStorage.getItem('admin_session_token');
+    const expiresAt = localStorage.getItem('admin_session_expires_at');
+    
+    if (sessionToken && expiresAt && new Date(expiresAt) > new Date()) {
+      // Verify session is still valid
+      verifyAdminSession(sessionToken)
+        .then(isValid => {
+          if (isValid) {
+            authOverlay.style.display = 'none';
+            dashboard.style.display = 'block';
+            loadDashboardData();
+          } else {
+            clearAdminSession();
+          }
+        })
+        .catch(() => {
+          clearAdminSession();
+        });
+    } else {
+      clearAdminSession();
     }
     
     // Admin login
     adminLoginBtn.addEventListener('click', async function() {
+      const username = adminUsername.value.trim();
       const password = adminPassword.value;
       
-      if (await checkAdminPassword(password)) {
-        localStorage.setItem('sypher-admin-authenticated', 'true');
-        authOverlay.style.display = 'none';
-        dashboard.style.display = 'block';
-        loadDashboardData();
-      } else {
-        alert('Invalid admin password. Please try again with the correct password.');
-        adminPassword.value = '';
+      if (!username || !password) {
+        authMessage.textContent = 'Please enter both username and password';
+        authMessage.style.display = 'block';
+        return;
+      }
+      
+      try {
+        // Call RPC to verify credentials and create session
+        const { data, error } = await supabase.rpc('create_admin_session', {
+          p_username: username,
+          p_password: password
+        });
+
+        if (error) {
+          console.error(error);
+          authMessage.textContent = 'Login failed. Please check your credentials.';
+          authMessage.style.display = 'block';
+          return;
+        }
+
+        // data is an array because RPC returns a set; pick the first row
+        const result = Array.isArray(data) ? data[0] : data;
+
+        if (result && result.success) {
+          // store token in localStorage and redirect to dashboard
+          localStorage.setItem('admin_session_token', result.session_token);
+          localStorage.setItem('admin_session_expires_at', result.expires_at);
+          authOverlay.style.display = 'none';
+          dashboard.style.display = 'block';
+          loadDashboardData();
+        } else {
+          authMessage.textContent = 'Invalid username or password.';
+          authMessage.style.display = 'block';
+        }
+      } catch (err) {
+        console.error(err);
+        authMessage.textContent = 'Login error. Please try again.';
+        authMessage.style.display = 'block';
       }
     });
     
     // Allow Enter key to submit
+    adminUsername.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        adminPassword.focus();
+      }
+    });
+    
     adminPassword.addEventListener('keypress', function(e) {
       if (e.key === 'Enter') {
         adminLoginBtn.click();
@@ -1079,9 +1125,10 @@
     
     // Logout
     logoutBtn.addEventListener('click', function() {
-      localStorage.removeItem('sypher-admin-authenticated');
+      clearAdminSession();
       authOverlay.style.display = 'flex';
       dashboard.style.display = 'none';
+      adminUsername.value = '';
       adminPassword.value = '';
     });
     
@@ -1100,6 +1147,32 @@
         document.getElementById(sectionId).style.display = 'block';
       });
     });
+    
+    // Verify admin session function
+    async function verifyAdminSession(token) {
+      try {
+        const { data, error } = await supabase.rpc('verify_admin_session', {
+          p_token: token
+        });
+        
+        if (error) {
+          console.error('Session verification error:', error);
+          return false;
+        }
+        
+        const result = Array.isArray(data) ? data[0] : data;
+        return result && result.valid;
+      } catch (error) {
+        console.error('Session verification error:', error);
+        return false;
+      }
+    }
+    
+    // Clear admin session
+    function clearAdminSession() {
+      localStorage.removeItem('admin_session_token');
+      localStorage.removeItem('admin_session_expires_at');
+    }
     
     // Load dashboard data
     function loadDashboardData() {
@@ -1458,18 +1531,38 @@
     // Change admin password
     document.getElementById('changePasswordBtn').addEventListener('click', async function() {
       const newPassword = document.getElementById('newAdminPassword').value;
+      const sessionToken = localStorage.getItem('admin_session_token');
       
-      if (!newPassword || newPassword.length !== 4) {
-        alert('Password must be 4 digits');
+      if (!newPassword) {
+        alert('Please enter a new password');
+        return;
+      }
+      
+      if (!sessionToken) {
+        alert('Session expired. Please log in again.');
+        clearAdminSession();
+        authOverlay.style.display = 'flex';
+        dashboard.style.display = 'none';
         return;
       }
       
       try {
-        // In a real app, you should hash the password before storing it
+        // Verify session first
+        const isValid = await verifyAdminSession(sessionToken);
+        if (!isValid) {
+          alert('Session expired. Please log in again.');
+          clearAdminSession();
+          authOverlay.style.display = 'flex';
+          dashboard.style.display = 'none';
+          return;
+        }
+        
+        // In a real app, you should call an RPC function to change the password
+        // For now, we'll use a direct update (not recommended for production)
         const { error } = await supabase
           .from('admin_users')
           .update({ password_hash: newPassword })
-          .eq('id', 1); // Assuming there's only one admin user with ID 1
+          .eq('username', 'admin');
           
         if (error) {
           throw new Error(error.message);
